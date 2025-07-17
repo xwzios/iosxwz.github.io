@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>综合工具集</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: url('https://n.sinaimg.cn/sinakd20113/560/w1080h1080/20220505/a2a5-5911bca503d5ac213bd92772f90d3936.jpg') no-repeat center center fixed;
+            background-size: cover; 
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        h1, h2, h3 {
+            text-align: center;
+            color: #333;
+        }
+
+        .time, .visitor-count {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #666;
+        }
+
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab-button {
+            background-color: #f1f1f1;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 10px 20px;
+            margin-right: 2px;
+            border-radius: 5px 5px 0 0;
+            transition: 0.3s;
+        }
+
+        .tab-button:hover {
+            background-color: #ddd;
+        }
+
+        .tab-button.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+            background-color: white;
+        }
+
+        textarea, input, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        textarea {
+            height: 150px;
+            resize: vertical;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .button-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>综合工具集</h1>
+        <div class="time" id="currentTime">当前时间: <span id="time"></span></div>
+        <div class="visitor-count" id="visitorCount">访问者人数: <span id="visitorNumber">0</span></div>
+
+        <div class="tabs">
+            <button class="tab-button active" onclick="openTab(event, 'scriptAutomatic')">脚本自动转换</button>
+            <button class="tab-button" onclick="openTab(event, 'adapty')">Adapty脚本生成</button>
+            <button class="tab-button" onclick="openTab(event, 'iTunes')">iTunes脚本</button>
+            <button class="tab-button" onclick="openTab(event, 'iTunesObjc')">iTunes-objc脚本</button>
+            <button class="tab-button" onclick="openTab(event, 'scriptObjc')">Script-objc</button>
+            <button class="tab-button" onclick="openTab(event, 'objcJson')">JSON转Objc</button>
+            <button class="tab-button" onclick="openTab(event, 'requestHeader')">请求头参数替换</button>
+            <button class="tab-button" onclick="openTab(event, 'verifyReceipt')">VerifyReceipt</button>
+            <button class="tab-button" onclick="openTab(event, 'sessionDelegate')">SessionDelegate</button>
+            <button class="tab-button" onclick="openTab(event, 'afURLSessionManager')">AFURLSessionManager</button>
+            <button class="tab-button" onclick="openTab(event, 'afHTTPRequestOperation')">AFHTTPRequestOperation</button>
+            <button class="tab-button" onclick="openTab(event, 'httpAsynConnection')">HttpAsynConnection</button>
+        </div>
+
+        <!-- 脚本自动转换 -->
+        <div id="scriptAutomatic" class="tab-content" style="display: block;">
+            <h2>脚本自动转换</h2>
+            <select id="jsonFormat">
+                <option value="tennis">网球 JSON 格式</option>
+                <option value="spider">蜘蛛 JSON 格式</option>
+            </select>
+            <h3>输入 JSON 数据</h3>
+            <textarea id="jsonInput" placeholder='{"rules":[{"matchValue":"match1","value":"value1"},{"matchValue":"match2","value":"value2"}]}'></textarea>
+            <button id="generateScriptButton">生成 Objective-C 代码</button>
+            <h3>生成的 Objective-C 代码</h3>
+            <pre id="scriptOutput"></pre>
+            <button id="copyScriptButton">复制到剪贴板</button>
+        </div>
+
+        <!-- Adapty脚本生成 -->
+        <div id="adapty" class="tab-content">
+            <h2>Adapty脚本生成</h2>
+            <label for="adaptyValue1">Value 1:</label>
+            <input type="text" id="adaptyValue1" placeholder="Enter value 1 (default: premium)">
+            
+            <label for="adaptyValue2">Value 2:</label>
+            <input type="text" id="adaptyValue2" placeholder="Enter value 2 (default: same as value 1)">
+            
+            <label for="adaptyValue3">Value 3:</label>
+            <input type="text" id="adaptyValue3" placeholder="Enter value 3">
+            
+            <label for="adaptyValue4">Value 4:</label>
+            <input type="text" id="adaptyValue4" placeholder="Enter value 4 (default: same as value 3)">
+            
+            <button onclick="generateAdaptyScript()">生成脚本</button>
+            <h3>生成的脚本:</h3>
+            <pre id="adaptyOutput"></pre>
+            <button onclick="copyAdaptyScript()">复制到剪贴板</button>
+        </div>
+
+        <!-- iTunes脚本 -->
+        <div id="iTunes" class="tab-content">
+            <h2>iTunes脚本生成</h2>
+            <label for="itunesBundleId">Bundle ID:</label>
+            <input type="text" id="itunesBundleId" placeholder="Enter Bundle ID">
+            
+            <label for="itunesProductId">Product ID:</label>
+            <input type="text" id="itunesProductId" placeholder="Enter Product ID">
+            
+            <button onclick="generateITunesScript()">生成脚本</button>
+            <h3>生成的脚本:</h3>
+            <pre id="itunesOutput"></pre>
+            <button onclick="copyITunesScript()">复制到剪贴板</button>
+        </div>
+
+        <!-- iTunes-objc脚本 -->
+        <div id="iTunesObjc" class="tab-content">
+            <h2>iTunes-objc脚本生成</h2>
+            <label for="itunesObjcProductId">Product ID:</label>
+            <input type="text" id="itunesObjcProductId" placeholder="Enter Product ID" required>
+            
+            <label for="itunesObjcBundleId">Bundle ID:</label>
+            <input type="text" id="itunesObjcBundleId" placeholder="Enter Bundle ID" required>
+            
+            <button onclick="generateITunesObjcCode()">生成代码</button>
+            <h3>生成的代码:</h3>
+            <pre id="itunesObjcOutput"></pre>
+            <button onclick="copyITunesObjcCode()">复制到剪贴板</button>
+        </div>
+
+        <!-- Script-objc -->
+        <div id="scriptObjc" class="tab-content">
+            <h2>Script-objc</h2>
+            <label for="scriptObjcJsonInput">Enter JSON Data:</label>
+            <textarea id="scriptObjcJsonInput" rows="6" placeholder='{"matchValue": "exampleString", "value": "exampleValue"}'></textarea>
+            
+            <label for="scriptObjcCodeSelect">Select Code:</label>
+            <select id="scriptObjcCodeSelect">
+                <option value="selectCode">Select an option</option>
+                <option value="code1">Code Example 1 - NSURLSession Hook</option>
+                <option value="code2">Code Example 2 - AFURLSessionManager</option>
+                <option value="code3">Code Example 3 - Session Delegate</option>
+                <option value="code4">Code Example 4 - HttpAsynConnection</option>
+                <option value="code5">No Template Available</option>
+            </select>
+            
+            <button onclick="generateScriptObjcCode()">生成代码</button>
+            <h3>生成的代码:</h3>
+            <pre id="scriptObjcOutput"></pre>
+            <button onclick="copyScriptObjcCode()">复制到剪贴板</button>
+        </div>
+
+        <!-- JSON转Objc -->
+        <div id="objcJson" class="tab-content">
+            <h2>JSON转Objective-C</h2>
+            <textarea id="objcJsonInput" placeholder="输入JSON数据"></textarea>
+            <button onclick="convertJsonToObjc()">转换</button>
+            <h3>转换结果:</h3>
+            <pre id="objcJsonOutput"></pre>
+            <button onclick="copyObjcJsonOutput()">复制到剪贴板</button>
+        </div>
+
+        <!-- 请求头参数替换 -->
+        <div id="requestHeader" class="tab-content">
+            <h2>URL和Cookie替换工具</h2>
+            <label for="urlPrefix">输入匹配的URL路径前缀:</label>
+            <input type="text" id="urlPrefix" placeholder="例如: cdn.cmgadx.com">
+            
+            <label for="host">输入匹配的host:</label>
+            <input type="text" id="host" placeholder="例如: ysp.cctv.cn">
+            
+            <label for="cookieValue">输入需要替换的Cookie值:</label>
+            <input type="text" id="cookieValue" placeholder="输入Cookie值">
+            
+            <button onclick="generateRequestHeaderCode()">生成代码</button>
+            <h3>生成的代码:</h3>
+            <pre id="requestHeaderOutput"></pre>
+            <button onclick="copyRequestHeaderCode()">复制到剪贴板</button>
+        </div>
+
+        <!-- VerifyReceipt -->
+        <div id="verifyReceipt" class="tab-content">
+            <h2>VerifyReceipt Hook代码生成</h2>
+            <h3>输入替换数据 (Objective-C Dictionary格式)</h3>
+            <textarea id="verifyReceiptData" placeholder='Example: @{ @"status": @0, @"message": @"success", @"content": @{ @"isVip": @1, @"vipDeadline": @"2999/09/09", @"isShow": @1 }, @"isTest": @0 }'></textarea>
+            
+            <button onclick="generateVerifyReceiptCode()">生成代码</button>
+            <h3>生成的代码:</h3>
+            <pre id="verifyReceiptOutput"></pre>
+            <button onclick="copyVerifyReceiptCode()">复制到剪贴板</button>
+        </div>
+
+        <!-- SessionDelegate -->
+        <div id="sessionDelegate" class="tab-content">
+            <h2>SessionDelegate代码生成</h2>
+            <h3>输入JSON(script-重写)数据</h3>
+            <textarea id="sessionDelegateInput"></textarea>
+            <button onclick="generateSessionDelegateCode()">生成代码</button>
+            <h3>生成的代码:</h3>
+            <pre id="sessionDelegateOutput"></pre>
+            <button onclick="copySessionDelegateCode()">复制到剪贴板</button>
+        </div>
+
+        <!-- AFURLSessionManager -->
+        <div id="afURLSessionManager" class="tab-content">
+            <h2>AFURLSessionManager代码生成</h2>
+            <h3>输入URL(path)后缀</h3>
+            <input type="text" id="afUrlSuffix" placeholder="Enter URL suffix to match (e.g., GetUserInventory)">
+            
+            <h3>输入JSON(script-重写数据)数据</h3>
+            <textarea id="afUrlSessionInput"></textarea>
+            <button onclick="generateAFURLSessionCode()">生成代码</button>
+            <h3>生成的代码:</h3>
+            <pre id="afUrlSessionOutput"></pre>
+            <button onclick="copyAFURLSessionCode()">复制到剪贴板</button>
+        </div>
+
+        <!-- AFHTTPRequestOperation -->
+        <div id="afHTTPRequestOperation" class="tab-content">
+            <h2>AFHTTPRequestOperation代码生成</h2>
+            <h3>输入JSON数据</h3>
+            <textarea id="afHttpRequestInput" placeholder="请输入JSON数据..."></textarea>
+            <button onclick="generateAFHTTPRequestCode()">生成代码</button>
+            
+            <h3>输入需要匹配的URL路径</h3>
+            <textarea id="afHttpUrlMatchInput" placeholder="请输入需要匹配的URL路径..."></textarea>
+            
+            <h3>生成的代码:</h3>
+            <pre id="afHttpRequestOutput"></pre>
+            <button onclick="copyAFHTTPRequestCode()">复制到剪贴板</button>
+        </div>
+
+        <!-- HttpAsynConnection -->
+        <div id="httpAsynConnection" class="tab-content">
+            <h2>HttpAsynConnection代码生成</h2>
+            <h3>输入JSON数据</h3>
+            <textarea id="httpAsynInput"></textarea>
+            <button onclick="generateHttpAsynCode()">生成代码</button>
+            <h3>生成的代码:</h3>
+            <pre id="httpAsynOutput"></pre>
+            <button onclick="copyHttpAsynCode()">复制到剪贴板</button>
+        </div>
+    </div>
+
+    <script>
+        // 通用函数
+        function updateTime() {
+            const now = new Date();
+            const options = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            document.getElementById('time').textContent = now.toLocaleTimeString(undefined, options);
+        }
+
+        function updateVisitorCount() {
+            let count = localStorage.getItem('visitCount') || 0;
+            count++;
+            localStorage.setItem('visitCount', count);
+            document.getElementById('visitorNumber').textContent = count;
+        }
+
+        function openTab(evt, tabName) {
+            var i, tabContent, tabButtons;
+            
+            tabContent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabContent.length; i++) {
+                tabContent[i].style.display = "none";
+            }
+            
+            tabButtons = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].className = tabButtons[i].className.replace(" active", "");
+            }
+            
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+
+        function copyToClipboard(text, message = "已复制到剪贴板！") {
+            navigator.clipboard.writeText(text).then(() => {
+                alert(message);
+            }).catch(err => {
+                alert('复制失败: ' + err);
+            });
+        }
+
+        // 脚本自动转换
+        document.getElementById('generateScriptButton').addEventListener('click', function() {
+            const jsonInput = document.getElementById('jsonInput').value;
+            const jsonFormat = document.getElementById('jsonFormat').value;
+
+            try {
+                const data = JSON.parse(jsonInput);
+                const patterns = [];
+                const replacements = [];
+
+                if (jsonFormat === 'tennis') {
+                    if (data.rules) {
+                        data.rules.forEach(rule => {
+                            patterns.push(rule.matchValue);
+                            replacements.push(rule.value);
+                        });
+                    }
+                } else if (jsonFormat === 'spider') {
+                    if (data.pathes) {
+                        data.pathes.forEach(path => {
+                            path.rules.forEach(rule => {
+                                patterns.push(rule.key);
+                                replacements.push(rule.value);
+                            });
+                        });
+                    }
+                }
+
+                const objcCode = `
+#import <UIKit/UIKit.h>
+#import <objc/runtime.h>
+#import <Foundation/Foundation.h>
+
+%hook NSJSONSerialization
+
++ (id)JSONObjectWithData:(NSData *)data options:(NSJSONReadingOptions)opt error:(NSError **)error {
+    NSString *jsonString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+
+    if (jsonString) {
+        NSArray *patterns = @[
+            ${patterns.map(pattern => `"${pattern}"`).join(', ')}
+        ];
+
+        NSArray *replacements = @[
+            ${replacements.map(replacement => `"${replacement}"`).join(', ')}
+        ];
+
+        for (NSInteger i = 0; i < patterns.count; i++) {
+            jsonString = [jsonString stringByReplacingOccurrencesOfString:patterns[i] withString:replacements[i] options:NSRegularExpressionSearch range:NSMakeRange(0, jsonString.length)];
+        }
+        
+        data = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
+    }
+
+    return %orig(data, opt, error);
+}}
+
+%end
+                `.trim();
+
+                document.getElementById('scriptOutput').textContent = objcCode;
+            } catch (e) {
+                document.getElementById('scriptOutput').textContent = 'Error parsing JSON: ' + e.message;
+            }
+        });
+
+        document.getElementById('copyScriptButton').addEventListener('click', function() {
+            const output = document.getElementById('scriptOutput').textContent;
+            copyToClipboard(output);
+        });
+
+        // Adapty脚本生成
+        function generateAdaptyScript() {
+            var value1 = document.getElementById('adaptyValue1').value;
+            var value2 = document.getElementById('adaptyValue2').value;
+            var value3 = document.getElementById('adaptyValue3').value;
+            var value4 = document.getElementById('adaptyValue4').value;
+
+            if (!value1) {
+                value1 = "premium";
+            }
+
+            if (!value4) {
+                value4 = value3;
+            }
+
+            if (!value2) {
+                value2 = value1;
+            }
+
+            var script = 
+`var body = $response.body;
+var obj = JSON.parse(body);
+var header = $request.headers;
+...
+    "subscriptions": {
+        "${value3}": {
+            "is_active": true,
+            "is_lifetime": false,
+            "expires_at": "9692-12-26T16:30:25.000000+0000",
+            "starts_at": null,
+            "will_renew": true,
+            "vendor_product_id":
+            "${value4}",
+            "store": "app_store",
+            "activated_at": "2023-12-23T16:30:26.000000+0000",
+            "renewed_at": "2023-12-23T16:30:25.000000+0000",
+            "unsubscribed_at": null,
+            "billing_issue_detected_at": null,
+            "is_in_grace_period": false,
+            "active_introductory_offer_type": "free_trial",
+            "offer_id": null,
+            "active_promotional_offer_type": null,
+            "active_promotional_offer_id": null,
+            "cancellation_reason": null,
+            "is_refund": false
+        }
+    }
+}
+};
+
+body = JSON.stringify(obj);
+$done({body});
+`;
+
+            document.getElementById('adaptyOutput').textContent = script;
+        }
+
+        function copyAdaptyScript() {
+            const output = document.getElementById('adaptyOutput').textContent;
+            copyToClipboard(output);
+        }
+
+        // iTunes脚本
+        function generateITunesScript() {
+            var bundleId = document.getElementById('itunesBundleId').value.trim();
+            var productId = document.getElementById('itunesProductId').value.trim();
+
+            if (!bundleId || !productId) {
+                alert('请填写Bundle ID和Product ID');
+                return;
+            }
+
+            var script = 
+`var objc = JSON.parse($response.body);
+...
+
+$response.body = JSON.stringify(objc);
+$done($response);
+`;
+
+            document.getElementById('itunesOutput').textContent = script;
+        }
+
+        function copyITunesScript() {
+            const output = document.getElementById('itunesOutput').textContent;
+            copyToClipboard(output);
+        }
+
+        // iTunes-objc脚本
+        function generateITunesObjcCode() {
+            var productId = document.getElementById('itunesObjcProductId').value.trim();
+            var bundleId = document.getElementById('itunesObjcBundleId').value.trim();
+
+            if (!productId || !bundleId) {
+                alert('请填写Product ID和Bundle ID');
+                return;
+            }
+
+            var code = `
+#import <Foundation/Foundation.h>
+
+%hook NSURLSession
+
+- (NSURLSessionDataTask *)dataTaskWithRequest:(NSURLRequest *)request completionHandler:(void (^)(NSData *data, NSURLResponse *response, NSError *error))completionHandler {
+    NSMutableURLRequest *mutableRequest = [request mutableCopy];
+    NSURL *url = request.URL;
+    
+    if ([url.absoluteString containsString:@"buy.itunes.apple.com/verifyReceipt"]) {
+        void (^newCompletion)(NSData *, NSURLResponse *, NSError *) = ^(NSData *data, NSURLResponse *response, NSError *error) {
+            if (data) {
+                NSDictionary *receiptResponse = @{
+                    @"status": @0,
+                    @"receipt": @{
+                        @"in_app": @[
+                            @{
+                                @"quantity": @"1",
+                                @"product_id": @"${productId}",
+                                @"transaction_id": @"1000000000000000",
+                                @"original_transaction_id": @"1000000000000000",
+                                @"purchase_date": @"2023-01-01 00:00:00 Etc/GMT",
+                                @"purchase_date_ms": @"1672531200000",
+                                @"purchase_date_pst": @"2023-01-01 00:00:00 America/Los_Angeles",
+                                @"original_purchase_date": @"2023-01-01 00:00:00 Etc/GMT",
+                                @"original_purchase_date_ms": @"1672531200000",
+                                @"original_purchase_date_pst": @"2023-01-01 00:00:00 America/Los_Angeles",
+                                @"expires_date": @"2099-01-01 00:00:00 Etc/GMT",
+                                @"expires_date_ms": @"4070908800000",
+                                @"expires_date_pst": @"2099-01-01 00:00:00 America/Los_Angeles",
+                                @"web_order_line_item_id": @"1000000000000000",
+                                @"is_trial_period": @"false",
+                                @"is_in_intro_offer_period": @"false",
+                                @"in_app_ownership_type": @"PURCHASED"
+                            }
+                        ],
+                        @"adam_id": @123456789,
+                        @"app_item_id": @123456789,
+                        @"application_version": @"1.0",
+                        @"bundle_id": @"${bundleId}",
+                        @"download_id": @123456789,
+                        @"receipt_creation_date": @"2023-01-01 00:00:00 Etc/GMT",
+                        @"receipt_creation_date_ms": @"1672531200000",
+                        @"receipt_creation_date_pst": @"2023-01-01 00:00:00 America/Los_Angeles",
+                        @"receipt_type": @"Production",
+                        @"request_date": @"2023-01-01 00:00:00 Etc/GMT",
+                        @"request_date_ms": @"1672531200000",
+                        @"request_date_pst": @"2023-01-01 00:00:00 America/Los_Angeles",
+                        @"version_external_identifier": @123456789
+                    },
+                    @"latest_receipt_info": @[
+                        @{
+                            @"quantity": @"1",
+                            @"product_id": @"${productId}",
+                            @"transaction_id": @"1000000000000000",
+                            @"original_transaction_id": @"1000000000000000",
+                            @"purchase_date": @"2023-01-01 00:00:00 Etc/GMT",
+                            @"purchase_date_ms": @"1672531200000",
+                            @"purchase_date_pst": @"2023-01-01 00:00:00 America/Los_Angeles",
+                            @"original_purchase_date": @"2023-01-01 00:00:00 Etc/GMT",
+                            @"original_purchase_date_ms": @"1672531200000",
+                            @"original_purchase_date_pst": @"2023-01-01 00:00:00 America/Los_Angeles",
+                            @"expires_date": @"2099-01-01 00:00:00 Etc/GMT",
+                            @"expires_date_ms": @"4070908800000",
+                            @"expires_date_pst": @"2099-01-01 00:00:00 America/Los_Angeles",
+                            @"web_order_line_item_id": @"1000000000000000",
+                            @"is_trial_period": @"false",
+                            @"is_in_intro_offer_period": @"false",
+                            @"in_app_ownership_type": @"PURCHASED",
+                            @"subscription_group_identifier": @"12345678"
+                        }
+                    ],
+                    @"latest_receipt": @"base64receipt",
+                    @"pending_renewal_info": @[
+                        @{
+                            @"auto_renew_product_id": @"${productId}",
+                            @"product_id": @"${productId}",
+                            @"original_transaction_id": @"1000000000000000",
+                            @"auto_renew_status": @"1"
+                        }
+                    ],
+                    @"environment": @"Production"
+                };
+                
+                NSData *jsonData = [NSJSONSerialization dataWithJSONObject:receiptResponse options:0 error:nil];
+                completionHandler(jsonData, response, error);
+            } else {
+                completionHandler(data, response, error);
+            }
+        };
+        
+        return %orig(mutableRequest, newCompletion);
+    }
+    
+    return %orig;
+}
+
+%end
+`;
+
+            document.getElementById('itunesObjcOutput').textContent = code;
+            document.getElementById('copyITunesObjcCode').style.display = 'block';
+        }
+
+        function copyITunesObjcCode() {
+            const output = document.getElementById('itunesObjcOutput').textContent;
+            copyToClipboard(output);
+        }
+
+        // Script-objc
+        function generateScriptObjcCode() {
+            const jsonInput = document.getElementById('scriptObjcJsonInput').value;
+            const codeSelect = document.getElementById('scriptObjcCodeSelect').value;
+            
+            if (codeSelect === 'selectCode') {
+                alert('请选择一个代码模板');
+                return;
+            }
+            
+            try {
+                const data = JSON.parse(jsonInput);
+                let matchValue = '';
+                let value = '';
+                
+                if (data.matchValue && data.value) {
+                    matchValue = data.matchValue;
+                    value = data.value;
+                }
+                
+                let code = '';
+                
+                switch(codeSelect) {
+                    case 'code1':
+                        code = `
+#import <Foundation/Foundation.h>
+
+%hook NSURLSession
+
+- (NSURLSessionDataTask *)dataTaskWithRequest:(NSURLRequest *)request completionHandler:(void (^)(NSData *data, NSURLResponse *response, NSError *error))completionHandler {
+    NSMutableURLRequest *mutableRequest = [request mutableCopy];
+    
+    void (^newCompletion)(NSData *, NSURLResponse *, NSError *) = ^(NSData *data, NSURLResponse *response, NSError *error) {
+        if (data) {
+            NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+            if ([str containsString:@"${matchValue}"]) {
+                str = [str stringByReplacingOccurrencesOfString:@"${matchValue
