@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能代理转换工具 - 支持 Quantumult X</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .converter-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            min-height: 700px;
+        }
+        
+        .section {
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .section:not(:last-child) {
+            border-right: 2px solid #ecf0f1;
+        }
+        
+        .section-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .format-selector {
+            margin-bottom: 15px;
+        }
+        
+        .format-selector select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #bdc3c7;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+        }
+        
+        .text-area {
+            flex: 1;
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            padding: 12px;
+            resize: none;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .text-area:focus {
+            border-color: #3498db;
+        }
+        
+        .output-area {
+            background: #f8f9fa;
+            border-color: #27ae60;
+        }
+        
+        .theos-area {
+            background: #fff5f5;
+            border-color: #e74c3c;
+        }
+        
+        .quantumult-area {
+            background: #f0f8ff;
+            border-color: #3498db;
+        }
+        
+        .controls {
+            margin: 15px 0;
+            text-align: center;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            margin: 0 3px;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-copy {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+        }
+        
+        .btn-clear {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+        
+        .btn-generate {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+        }
+        
+        .status {
+            margin-top: 10px;
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .auto-generate-info {
+            background: #e8f4fd;
+            border: 1px solid #bee5eb;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            color: #0c5460;
+        }
+        
+        @media (max-width: 1400px) {
+            .converter-section {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        @media (max-width: 900px) {
+            .converter-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .section:not(:last-child) {
+                border-right: none;
+                border-bottom: 2px solid #ecf0f1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 智能代理转换工具</h1>
+            <p>代理配置转换 + 自动生成 Theos Hook + Quantumult X 重写脚本</p>
+        </div>
+        
+        <div class="converter-section">
+            <!-- 输入区域 -->
+            <div class="section">
+                <div class="section-title">
+                    📥 输入配置
+                </div>
+                
+                <div class="format-selector">
+                    <select id="inputFormat">
+                        <option value="storm">httpcatcher 格式</option>
+                        <option value="spider">Spider Proxy 格式</option>
+                    </select>
+                </div>
+                
+                <textarea id="inputArea" class="text-area" placeholder="请粘贴您的配置 JSON..."></textarea>
+                
+                <div class="controls">
+                    <button class="btn" onclick="convertAndGenerate()">🔄 全部转换</button>
+                    <button class="btn btn-clear" onclick="clearAll()">🗑️ 清空</button>
+                </div>
+            </div>
+            
+            <!-- 转换输出区域 -->
+            <div class="section">
+                <div class="section-title">
+                    📤 转换结果
+                </div>
+                
+                <div class="format-selector">
+                    <select id="outputFormat">
+                        <option value="spider">Spider Proxy 格式</option>
+                        <option value="storm">httpcatcher 格式</option>
+                    </select>
+                </div>
+                
+                <textarea id="outputArea" class="text-area output-area" readonly placeholder="转换结果将显示在这里..."></textarea>
+                
+                <div class="controls">
+                    <button class="btn btn-copy" onclick="copyOutput()">📋 复制配置</button>
+                </div>
+                
+                <div id="status" class="status" style="display: none;"></div>
+            </div>
+            
+            <!-- Theos Hook 生成区域 -->
+            <div class="section">
+                <div class="section-title">
+                    🔧 Theos Hook 脚本
+                </div>
+                
+                <div class="auto-generate-info">
+                    💡 <strong>iOS越狱设备:</strong> 自动生成Theos Hook脚本，用于iOS应用注入
+                </div>
+                
+                <textarea id="theosArea" class="text-area theos-area" readonly placeholder="Theos Hook脚本将自动生成..."></textarea>
+                
+                <div class="controls">
+                    <button class="btn btn-copy" onclick="copyTheos()">📋 复制Hook</button>
+                    <button class="btn btn-generate" onclick="regenerateTheos()">🔄 重新生成</button>
+                </div>
+                
+                <div id="theosStatus" class="status" style="display: none;"></div>
+            </div>
+            
+            <!-- Quantumult X 重写脚本区域 -->
+            <div class="section">
+                <div class="section-title">
+                    📱 Quantumult X 脚本
+                </div>
+                
+                <div class="auto-generate-info">
+                    💡 <strong>免越狱设备:</strong> 自动生成Quantumult X重写脚本，无需越狱
+                </div>
+                
+                <textarea id="quantumultArea" class="text-area quantumult-area" readonly placeholder="Quantumult X重写脚本将自动生成..."></textarea>
+                
+                <div class="controls">
+                    <button class="btn btn-copy" onclick="copyQuantumult()">📋 复制脚本</button>
+                    <button class="btn btn-generate" onclick="regenerateQuantumult()">🔄 重新生成</button>
+                </div>
+                
+                <div id="quantumultStatus" class="status" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 自动切换输出格式
+        document.getElementById('inputFormat').addEventListener('change', function() {
+            const outputFormat = document.getElementById('outputFormat');
+            if (this.value === 'storm') {
+                outputFormat.value = 'spider';
+            } else {
+                outputFormat.value = 'storm';
+            }
+        });
+
+        function showStatus(message, isError = false, elementId = 'status') {
+            const status = document.getElementById(elementId);
+            status.textContent = message;
+            status.className = `status ${isError ? 'error' : 'success'}`;
+            status.style.display = 'block';
+            
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 3000);
+        }
+
+        function convertAndGenerate() {
+            // 先进行代理配置转换
+            const success = convertConfig();
+            if (success) {
+                // 转换成功后自动生成Hook脚本和Quantumult X脚本
+                generateTheosFromRules();
+                generateQuantumultFromRules();
+            }
+        }
+
+        function convertConfig() {
+            const inputArea = document.getElementById('inputArea');
+            const outputArea = document.getElementById('outputArea');
+            const inputFormat = document.getElementById('inputFormat').value;
+            const outputFormat = document.getElementById('outputFormat').value;
+            
+            try {
+                const inputConfig = JSON.parse(inputArea.value);
+                let outputConfig;
+                
+                if (inputFormat === 'storm' && outputFormat === 'spider') {
+                    outputConfig = stormToSpider(inputConfig);
+                } else if (inputFormat === 'spider' && outputFormat === 'storm') {
+                    outputConfig = spiderToStorm(inputConfig);
+                } else {
+                    throw new Error('请选择不同的输入输出格式');
+                }
+                
+                outputArea.value = JSON.stringify(outputConfig, null, 2);
+                showStatus('✅ 转换成功！');
+                return true;
+                
+            } catch (error) {
+                showStatus(`❌ 转换失败: ${error.message}`, true);
+                outputArea.value = '';
+                return false;
+            }
+        }
+
+        function generateTheosFromRules() {
+            try {
+                const inputArea = document.getElementById('inputArea');
+                const inputFormat = document.getElementById('inputFormat').value;
+                const inputConfig = JSON.parse(inputArea.value);
+                
+                const extractedFields = extractFieldsFromConfig(inputConfig, inputFormat);
+                
+                if (extractedFields.length === 0) {
+                    showStatus('⚠️ 未检测到JSON字段修改规则', true, 'theosStatus');
+                    document.getElementById('theosArea').value = '// 未检测到可转换的JSON字段修改规则\n// 请确保配置中包含JSON字段的修改操作';
+                    return;
+                }
+                
+                const hookScript = generateTheosHookScript(extractedFields, inputConfig.name || inputConfig.title || 'AutoGenerated');
+                document.getElementById('theosArea').value = hookScript;
+                
+                showStatus(`✅ 成功生成Hook脚本！检测到 ${extractedFields.length} 个字段修改`, false, 'theosStatus');
+                
+            } catch (error) {
+                showStatus(`❌ Hook生成失败: ${error.message}`, true, 'theosStatus');
+                document.getElementById('theosArea').value = '';
+            }
+        }
+
+        function generateQuantumultFromRules() {
+            try {
+                const inputArea = document.getElementById('inputArea');
+                const inputFormat = document.getElementById('inputFormat').value;
+                const inputConfig = JSON.parse(inputArea.value);
+                
+                const extractedFields = extractFieldsFromConfig(inputConfig, inputFormat);
+                
+                if (extractedFields.length === 0) {
+                    showStatus('⚠️ 未检测到JSON字段修改规则', true, 'quantumultStatus');
+                    document.getElementById('quantumultArea').value = '// 未检测到可转换的JSON字段修改规则\n// 请确保配置中包含JSON字段的修改操作';
+                    return;
+                }
+                
+                const quantumultScript = generateQuantumultScript(extractedFields, inputConfig);
+                document.getElementById('quantumultArea').value = quantumultScript;
+                
+                showStatus(`✅ 成功生成Quantumult X脚本！检测到 ${extractedFields.length} 个字段修改`, false, 'quantumultStatus');
+                
+            } catch (error) {
+                showStatus(`❌ Quantumult X脚本生成失败: ${error.message}`, true, 'quantumultStatus');
+                document.getElementById('quantumultArea').value = '';
+            }
+        }
+
+        function extractFieldsFromConfig(config, format) {
+            const fields = [];
+            const fieldMap = new Map();
+            let rules = [];
+            
+            if (format === 'storm') {
+                rules = config.rules || [];
+            } else {
+                // Spider格式，从pathes中提取rules
+                config.pathes?.forEach(path => {
+                    rules = rules.concat(path.rules || []);
+                });
+            }
+            
+            rules.forEach(rule => {
+                let matchValue, value;
+                
+                if (format === 'storm') {
+                    matchValue = rule.matchValue;
+                    value = rule.value;
+                } else {
+                    // Spider格式
+                    matchValue = rule.key;
+                    value = rule.value;
+                }
+                
+                // 解析JSON字段修改规则
+                const fieldMatch = matchValue?.match(/"([^"]+)":\s*[\\]?[wd]+/);
+                const valueMatch = value?.match(/"([^"]+)":\s*(.+)/);
+                
+                if (fieldMatch && valueMatch) {
+                    const fieldName = fieldMatch[1];
+                    const fieldValue = valueMatch[2];
+                    
+                    // 避免重复字段
+                    if (!fieldMap.has(fieldName)) {
+                        const parsedField = parseFieldValue(fieldName, fieldValue);
+                        if (parsedField) {
+                            fields.push(parsedField);
+                            fieldMap.set(fieldName, true);
+                        }
+                    }
+                }
+            });
+            
+            return fields;
+        }
+
+        function parseFieldValue(fieldName, valueStr) {
+            // 清理值字符串
+            let cleanValue = valueStr.trim();
+            
+            // 检测数字
+            if (/^\d+$/.test(cleanValue)) {
+                return {
+                    name: fieldName,
+                    value: cleanValue,
+                    type: 'number'
+                };
+            }
+            
+            // 检测布尔值
+            if (cleanValue === '1' || cleanValue === 'true') {
+                return {
+                    name: fieldName,
+                    value: 'true',
+                    type: 'boolean'
+                };
+            }
+            
+            if (cleanValue === '0' || cleanValue === 'false') {
+                return {
+                    name: fieldName,
+                    value: 'false',
+                    type: 'boolean'
+                };
+            }
+            
+            // 检测字符串
+            const stringMatch = cleanValue.match(/^"([^"]*)"$/);
+            if (stringMatch) {
+                return {
+                    name: fieldName,
+                    value: stringMatch[1],
+                    type: 'string'
+                };
+            }
+            
+            // 默认作为字符串处理
+            return {
+                name: fieldName,
+                value: cleanValue.replace(/"/g, ''),
+                type: 'string'
+            };
+        }
+
+        function generateTheosHookScript(fields, projectName) {
+            const inputArea = document.getElementById('inputArea');
+            const inputFormat = document.getElementById('inputFormat').value;
+            const inputConfig = JSON.parse(inputArea.value);
+            
+            // 提取域名信息
+            let domains = [];
+            if (inputFormat === 'storm') {
+                domains = inputConfig.locations?.map(loc => `${loc.scheme || 'https'}://${loc.host}`) || [];
+            } else {
+                domains = inputConfig.pathes?.map(path => `${path.schema || 'https'}://${path.domain}`) || [];
+            }
+            
+            let script = `#import <Foundation/Foundation.h>\n#import <objc/runtime.h>\n\n`;
+            script += `// ${projectName} - Auto Generated Hook Script\n`;
+            script += `// Generated by Smart Proxy Converter\n`;
+            script += `// Detected ${fields.length} field modifications\n\n`;
+
+            script += `%hook SessionDelegate\n\n`;
+            script += `- (void)URLSession:(NSURLSession *)session dataTask:(NSURLSessionDataTask *)task didReceiveData:(NSData *)data {\n`;
+            
+            if (domains.length > 0) {
+                domains.forEach((domain, index) => {
+                    script += `    ${index === 0 ? 'if' : 'else if'} ([task.currentRequest.URL.absoluteString containsString:@"${domain}"]) {\n`;
+                    script += `        NSString *body = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];\n        \n`;
+                    script += `        // 替换代码将插入到这里\n`;
+                    
+                    fields.forEach(field => {
+                        let replacement;
+                        switch (field.type) {
+                            case 'string':
+                                replacement = `"${field.name}":"${field.value}"`;
+                                break;
+                            case 'boolean':
+                                replacement = `"${field.name}":${field.value === 'true' ? '1' : '0'}`;
+                                break;
+                            case 'number':
+                            default:
+                                replacement = `"${field.name}":${field.value}`;
+                                break;
+                        }
+                        script += `        body = [body stringByReplacingOccurrencesOfString:@"\\"${field.name}\\":\\\\d+" withString:@"${replacement}" options:NSRegularExpressionSearch range:NSMakeRange(0, body.length)];\n`;
+                    });
+                    
+                    script += `        \n        NSData *newData = [body dataUsingEncoding:NSUTF8StringEncoding];\n`;
+                    script += `        data = newData;\n`;
+                    script += `    }\n`;
+                });
+            } else {
+                // 如果没有域名信息，生成通用版本
+                script += `    if ([task.currentRequest.URL.absoluteString containsString:@"api"]) {\n`;
+                script += `        NSString *body = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];\n        \n`;
+                script += `        // 替换代码将插入到这里\n`;
+                
+                fields.forEach(field => {
+                    let replacement;
+                    switch (field.type) {
+                        case 'string':
+                            replacement = `"${field.name}":"${field.value}"`;
+                            break;
+                        case 'boolean':
+                            replacement = `"${field.name}":${field.value === 'true' ? '1' : '0'}`;
+                            break;
+                        case 'number':
+                        default:
+                            replacement = `"${field.name}":${field.value}`;
+                            break;
+                    }
+                    script += `        body = [body stringByReplacingOccurrencesOfString:@"\\"${field.name}\\":\\\\d+" withString:@"${replacement}" options:NSRegularExpressionSearch range:NSMakeRange(0, body.length)];\n`;
+                });
+                
+                script += `        \n        NSData *newData = [body dataUsingEncoding:NSUTF8StringEncoding];\n`;
+                script += `        data = newData;\n`;
+                script += `    }\n`;
+            }
+            
+            script += `    \n    %orig(session, task, data);\n`;
+            script += `}\n\n`;
+            script += `%end\n\n`;
+            script += `%ctor {\n`;
+            script += `    %init(SessionDelegate = objc_getClass("Alamofire.SessionDelegate"));\n`;
+            script += `}`;
+
+            return script;
+        }
+
+        function generateQuantumultScript(fields, config) {
+            const projectName = config.name || config.title || 'AutoGenerated';
+            
+            let script = `// ${projectName} - Quantumult X Rewrite Script\n`;
+            script += `// Generated by Smart Proxy Converter\n`;
+            script += `// Detected ${fields.length} field modifications\n\n`;
+            
+            script += `// 使用方法:\n`;
+            script += `// 1. 将此脚本保存为 .js 文件\n`;
+            script += `// 2. 在 Quantumult X 配置中添加重写规则:\n`;
+            
+            // 生成重写规则示例
+            if (config.pathes) {
+                config.pathes.forEach(path => {
+                    const domain = path.domain || 'example.com';
+                    const pathStr = path.path || '/api';
+                    script += `//    ^https?://${domain}${pathStr} url script-response-body script.js\n`;
+                });
+            } else if (config.locations) {
+                config.locations.forEach(location => {
+                    const host = location.host || 'example.com';
+                    const path = location.path || '/api';
+                    script += `//    ^https?://${host}${path} url script-response-body script.js\n`;
+                });
+            }
+            
+            script += `\n`;
+            script += `let body = $response.body;\n`;
+            script += `let obj = JSON.parse(body);\n\n`;
+            script += `// Auto-detected field modifications\n`;
+            
+            fields.forEach(field => {
+                let jsValue;
+                switch (field.type) {
+                    case 'string':
+                        jsValue = `"${field.value}"`;
+                        break;
+                    case 'boolean':
+                        jsValue = field.value === 'true' ? 'true' : 'false';
+                        break;
+                    case 'number':
+                    default:
+                        jsValue = field.value;
+                        break;
+                }
+                script += `if (obj.${field.name} !== undefined) obj.${field.name} = ${jsValue};\n`;
+            });
+            
+            script += `\n`;
+            script += `console.log("[${projectName}] Modified JSON response with ${fields.length} field(s)");\n`;
+            script += `$done({body: JSON.stringify(obj)});`;
+            
+            return script;
+        }
+
+        function regenerateTheos() {
+            generateTheosFromRules();
+        }
+
+        function regenerateQuantumult() {
+            generateQuantumultFromRules();
+        }
+
+        // 代理配置转换函数
+        function stormToSpider(stormConfig) {
+            const spiderConfig = {
+                title: stormConfig.name || "转换配置",
+                pathes: []
+            };
+
+            const locationGroups = {};
+            
+            stormConfig.locations.forEach(location => {
+                const key = `${location.host}${location.path}`;
+                if (!locationGroups[key]) {
+                    locationGroups[key] = {
+                        location: location,
+                        rules: []
+                    };
+                }
+            });
+
+            stormConfig.rules.forEach(rule => {
+                Object.keys(locationGroups).forEach(key => {
+                    locationGroups[key].rules.push({
+                        key: rule.matchValue,
+                        action: "MBody",
+                        type: "Response",
+                        remote: 0,
+                        value: rule.value
+                    });
+                });
+            });
+
+            Object.values(locationGroups).forEach(group => {
+                const location = group.location;
+                spiderConfig.pathes.push({
+                    method: location.method || "ALL",
+                    query: location.query || "",
+                    rules: group.rules,
+                    domain: location.host || "",
+                    mode: 0,
+                    schema: location.schema || "https",
+                    path: location.path || ""
+                });
+            });
+
+            return spiderConfig;
+        }
+
+        function spiderToStorm(spiderConfig) {
+            const stormConfig = {
+                rules: [],
+                enabled: true,
+                name: spiderConfig.title || "转换配置",
+                description: "",
+                locations: []
+            };
+
+            spiderConfig.pathes.forEach(path => {
+                stormConfig.locations.push({
+                    method: path.method === "ALL" ? "GET" : path.method,
+                    scheme: path.schema || "https",
+                    enabled: true,
+                    port: path.schema === "https" ? 443 : 80,
+                    query: path.query || "",
+                    host: path.domain || "",
+                    path: path.path || ""
+                });
+
+                path.rules.forEach(rule => {
+                    stormConfig.rules.push({
+                        action: "body",
+                        matchField: "",
+                        field: "",
+                        value: rule.value,
+                        matchValue: rule.key,
+                        destination: "response",
+                        isRegex: true
+                    });
+                });
+            });
+
+            return stormConfig;
+        }
+
+        function copyOutput() {
+            const outputArea = document.getElementById('outputArea');
+            outputArea.select();
+            document.execCommand('copy');
+            showStatus('📋 已复制配置到剪贴板！');
+        }
+
+        function copyTheos() {
+            const theosArea = document.getElementById('theosArea');
+            theosArea.select();
+            document.execCommand('copy');
+            showStatus('📋 已复制Hook脚本到剪贴板！', false, 'theosStatus');
+        }
+
+        function copyQuantumult() {
+            const quantumultArea = document.getElementById('quantumultArea');
+            quantumultArea.select();
+            document.execCommand('copy');
+            showStatus('📋 已复制Quantumult X脚本到剪贴板！', false, 'quantumultStatus');
+        }
+
+        function clearAll() {
+            document.getElementById('inputArea').value = '';
+            document.getElementById('outputArea').value = '';
+            document.getElementById('theosArea').value = '';
+            document.getElementById('quantumultArea').value = '';
+            showStatus('🗑️ 已清空所有内容');
+            showStatus('🗑️ 已清空所有内容', false, 'theosStatus');
+            showStatus('🗑️ 已清空所有内容', false, 'quantumultStatus');
+        }
+
+        // 示例数据
+        window.addEventListener('load', function() {
+            const exampleStorm = {
+                "rules": [
+                    {
+                        "action": "body",
+                        "matchField": "",
+                        "field": "",
+                        "value": "\"coins\":999999",
+                        "matchValue": "\"coins\":\\d+",
+                        "destination": "response",
+                        "isRegex": true
+                    },
+                    {
+                        "action": "body",
+                        "matchField": "",
+                        "field": "",
+                        "value": "\"vip\":1",
+                        "matchValue": "\"vip\":\\d+",
+                        "destination": "response",
+                        "isRegex": true
+                    }
+                ],
+                "enabled": true,
+                "name": "游戏破解示例",
+                "description": "",
+                "locations": [
+                    {
+                        "method": "GET",
+                        "scheme": "https",
+                        "enabled": true,
+                        "port": 443,
+                        "query": "",
+                        "host": "api.game.com",
+                        "path": "/user/info"
+                    }
+                ]
+            };
+            
+            document.getElementById('inputArea').placeholder = 
+                `请粘贴配置 JSON，系统将自动识别并生成Hook脚本和Quantumult X脚本\n\n示例配置：\n${JSON.stringify(exampleStorm, null, 2)}`;
+        });
+    </script>
+</body>
+</html>
