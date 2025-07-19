@@ -194,6 +194,46 @@
                 border-bottom: 2px solid #ecf0f1;
             }
         }
+        
+        .page-navigation {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn.active {
+            background: rgba(255, 255, 255, 0.9);
+            color: #2c3e50;
+            border-color: white;
+        }
+        
+        .page-content {
+            display: none;
+        }
+        
+        .page-content.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -201,91 +241,30 @@
         <div class="header">
             <h1>🚀 智能代理转换工具</h1>
             <p>代理配置转换 + 自动生成 Theos Hook + Quantumult X 重写脚本</p>
+            
+            <!-- 添加页面导航 -->
+            <div class="page-navigation">
+                <button class="nav-btn active" onclick="showPage('converter')">🔄 代理转换</button>
+                <button class="nav-btn" onclick="showPage('hook-generator')">🔧 Hook生成器</button>
+                <button class="nav-btn" onclick="showPage('patch-generator')">🛠️ Patch生成器</button>
+            </div>
         </div>
         
-        <div class="converter-section">
-            <!-- 输入区域 -->
-            <div class="section">
-                <div class="section-title">
-                    📥 输入配置
-                </div>
-                
-                <div class="format-selector">
-                    <select id="inputFormat">
-                        <option value="storm">httpcatcher 格式</option>
-                        <option value="spider">Spider Proxy 格式</option>
-                    </select>
-                </div>
-                
-                <textarea id="inputArea" class="text-area" placeholder="请粘贴您的配置 JSON..."></textarea>
-                
-                <div class="controls">
-                    <button class="btn" onclick="convertAndGenerate()">🔄 全部转换</button>
-                    <button class="btn btn-clear" onclick="clearAll()">🗑️ 清空</button>
-                </div>
+        <!-- 将现有的转换器内容包装在页面容器中 -->
+        <div id="converter-page" class="page-content active">
+            <div class="converter-section">
+                <!-- 现有的四个section保持不变 -->
             </div>
-            
-            <!-- 转换输出区域 -->
-            <div class="section">
-                <div class="section-title">
-                    📤 转换结果
-                </div>
-                
-                <div class="format-selector">
-                    <select id="outputFormat">
-                        <option value="spider">Spider Proxy 格式</option>
-                        <option value="storm">httpcatcher 格式</option>
-                    </select>
-                </div>
-                
-                <textarea id="outputArea" class="text-area output-area" readonly placeholder="转换结果将显示在这里..."></textarea>
-                
-                <div class="controls">
-                    <button class="btn btn-copy" onclick="copyOutput()">📋 复制配置</button>
-                </div>
-                
-                <div id="status" class="status" style="display: none;"></div>
-            </div>
-            
-            <!-- Theos Hook 生成区域 -->
-            <div class="section">
-                <div class="section-title">
-                    🔧 Theos Hook 脚本
-                </div>
-                
-                <div class="auto-generate-info">
-                    💡 <strong>iOS越狱设备:</strong> 自动生成Theos Hook脚本，用于iOS应用注入
-                </div>
-                
-                <textarea id="theosArea" class="text-area theos-area" readonly placeholder="Theos Hook脚本将自动生成..."></textarea>
-                
-                <div class="controls">
-                    <button class="btn btn-copy" onclick="copyTheos()">📋 复制Hook</button>
-                    <button class="btn btn-generate" onclick="regenerateTheos()">🔄 重新生成</button>
-                </div>
-                
-                <div id="theosStatus" class="status" style="display: none;"></div>
-            </div>
-            
-            <!-- Quantumult X 重写脚本区域 -->
-            <div class="section">
-                <div class="section-title">
-                    📱 Quantumult X 脚本
-                </div>
-                
-                <div class="auto-generate-info">
-                    💡 <strong>免越狱设备:</strong> 自动生成Quantumult X重写脚本，无需越狱
-                </div>
-                
-                <textarea id="quantumultArea" class="text-area quantumult-area" readonly placeholder="Quantumult X重写脚本将自动生成..."></textarea>
-                
-                <div class="controls">
-                    <button class="btn btn-copy" onclick="copyQuantumult()">📋 复制脚本</button>
-                    <button class="btn btn-generate" onclick="regenerateQuantumult()">🔄 重新生成</button>
-                </div>
-                
-                <div id="quantumultStatus" class="status" style="display: none;"></div>
-            </div>
+        </div>
+        
+        <!-- Hook生成器页面 -->
+        <div id="hook-generator-page" class="page-content">
+            <iframe src="theos-hook-generator.html" style="width: 100%; height: 800px; border: none; border-radius: 0 0 12px 12px;"></iframe>
+        </div>
+        
+        <!-- Patch生成器页面 -->
+        <div id="patch-generator-page" class="page-content">
+            <iframe src="theos-patch-generator.html" style="width: 100%; height: 800px; border: none; border-radius: 0 0 12px 12px;"></iframe>
         </div>
     </div>
 
@@ -757,6 +736,40 @@
             showStatus('🗑️ 已清空所有内容');
             showStatus('🗑️ 已清空所有内容', false, 'theosStatus');
             showStatus('🗑️ 已清空所有内容', false, 'quantumultStatus');
+        }
+
+        // 页面切换功能
+        function showPage(pageId) {
+            // 隐藏所有页面
+            document.querySelectorAll('.page-content').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // 移除所有导航按钮的active状态
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // 显示选中的页面
+            const targetPage = document.getElementById(pageId + '-page');
+            if (targetPage) {
+                targetPage.classList.add('active');
+            }
+            
+            // 激活对应的导航按钮
+            event.target.classList.add('active');
+            
+            // 更新页面标题
+            const titles = {
+                'converter': '🚀 智能代理转换工具',
+                'hook-generator': '🔧 Theos Hook 生成器', 
+                'patch-generator': '🛠️ Theos Patch 生成器'
+            };
+            
+            const headerTitle = document.querySelector('.header h1');
+            if (titles[pageId]) {
+                headerTitle.textContent = titles[pageId];
+            }
         }
 
         // 示例数据
