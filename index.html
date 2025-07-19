@@ -1,59 +1,256 @@
 
-        <div class="header">
-            <h1>🚀 智能代理转换工具</h1>
-            <p>代理配置转换 + 自动生成 Theos Hook + Quantumult X 重写脚本</p>
-            
-            <!-- 添加页面导航 -->
-            <div class="page-navigation">
-                <button class="nav-btn active" onclick="showPage('converter')">🔄 代理转换</button>
-                <button class="nav-btn" onclick="showPage('hook-generator')">🔧 Hook生成器</button>
-                <button class="nav-btn" onclick="showPage('patch-generator')">🛠️ Patch生成器</button>
-            </div>
-        </div>
-
-        .page-navigation {
-            margin-top: 20px;
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         
-        .nav-btn {
-            background: rgba(255, 255, 255, 0.2);
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
             color: white;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s;
-            backdrop-filter: blur(10px);
+            padding: 30px;
+            text-align: center;
         }
         
-        .nav-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            border-color: rgba(255, 255, 255, 0.5);
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .converter-section {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0;
+        }
+        
+        .section {
+            padding: 30px;
+            border-right: 2px solid #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            min-height: 600px;
+        }
+        
+        .section:last-child {
+            border-right: none;
+        }
+        
+        .section-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            text-align: center;
+        }
+        
+        .format-selector {
+            margin-bottom: 15px;
+        }
+        
+        .format-selector select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #bdc3c7;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+        }
+        
+        .text-area {
+            flex: 1;
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            padding: 12px;
+            resize: none;
+            outline: none;
+            transition: border-color 0.3s;
+            min-height: 300px;
+        }
+        
+        .text-area:focus {
+            border-color: #3498db;
+        }
+        
+        .output-area {
+            background: #f8f9fa;
+            border-color: #27ae60;
+        }
+        
+        .theos-area {
+            background: #fff5f5;
+            border-color: #e74c3c;
+        }
+        
+        .quantumult-area {
+            background: #f0f8ff;
+            border-color: #3498db;
+        }
+        
+        .controls {
+            margin: 15px 0;
+            text-align: center;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            margin: 2px;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
             transform: translateY(-2px);
         }
         
-        .nav-btn.active {
-            background: rgba(255, 255, 255, 0.9);
-            color: #2c3e50;
-            border-color: white;
+        .btn-generate {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
         }
         
-        .page-content {
-            display: none;
+        .btn-copy {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
         }
         
-        .page-content.active {
-            display: block;
+        .btn-clear {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+        }
+        
+        .auto-generate-info {
+            background: #e8f5e8;
+            border: 1px solid #27ae60;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            color: #27ae60;
+        }
+        
+        .status {
+            margin-top: 10px;
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        @media (max-width: 1400px) {
+            .converter-section {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        @media (max-width: 900px) {
+            .converter-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .section:not(:last-child) {
+                border-right: none;
+                border-bottom: 2px solid #ecf0f1;
+            }
         }
         <!-- 将现有的转换器内容包装在页面容器中 -->
         <div id="converter-page" class="page-content active">
             <div class="converter-section">
-                <!-- 现有的四个section保持不变 -->
+                <!-- 输入区域 -->
+                <div class="section">
+                    <div class="section-title">📥 输入配置</div>
+                    <div class="format-selector">
+                        <select id="inputFormat">
+                            <option value="storm">Storm Sniffer</option>
+                            <option value="spider">Spider</option>
+                        </select>
+                    </div>
+                    <textarea id="inputArea" class="text-area" placeholder="请粘贴配置 JSON..."></textarea>
+                    <div class="controls">
+                        <button class="btn btn-generate" onclick="convertAndGenerate()">🚀 转换并生成</button>
+                        <button class="btn btn-clear" onclick="clearAll()">🗑️ 清空</button>
+                    </div>
+                    <div id="status" class="status" style="display: none;"></div>
+                </div>
+
+                <!-- 输出区域 -->
+                <div class="section">
+                    <div class="section-title">📤 转换结果</div>
+                    <div class="format-selector">
+                        <select id="outputFormat">
+                            <option value="spider">Spider</option>
+                            <option value="storm">Storm Sniffer</option>
+                        </select>
+                    </div>
+                    <textarea id="outputArea" class="text-area output-area" readonly placeholder="转换结果将显示在这里..."></textarea>
+                    <div class="controls">
+                        <button class="btn btn-copy" onclick="copyOutput()">📋 复制</button>
+                    </div>
+                </div>
+
+                <!-- Theos Hook 区域 -->
+                <div class="section">
+                    <div class="section-title">🔧 Theos Hook</div>
+                    <div class="auto-generate-info">
+                        💡 自动从配置中提取JSON字段修改规则，生成对应的Hook脚本
+                    </div>
+                    <textarea id="theosArea" class="text-area theos-area" readonly placeholder="Hook脚本将自动生成..."></textarea>
+                    <div class="controls">
+                        <button class="btn btn-generate" onclick="regenerateTheos()">🔄 重新生成</button>
+                        <button class="btn btn-copy" onclick="copyTheos()">📋 复制</button>
+                    </div>
+                    <div id="theosStatus" class="status" style="display: none;"></div>
+                </div>
+
+                <!-- Quantumult X 区域 -->
+                <div class="section">
+                    <div class="section-title">📱 Quantumult X</div>
+                    <div class="auto-generate-info">
+                        💡 自动生成Quantumult X重写脚本，支持JSON响应修改
+                    </div>
+                    <textarea id="quantumultArea" class="text-area quantumult-area" readonly placeholder="Quantumult X脚本将自动生成..."></textarea>
+                    <div class="controls">
+                        <button class="btn btn-generate" onclick="regenerateQuantumult()">🔄 重新生成</button>
+                        <button class="btn btn-copy" onclick="copyQuantumult()">📋 复制</button>
+                    </div>
+                    <div id="quantumultStatus" class="status" style="display: none;"></div>
+                </div>
             </div>
         </div>
         
@@ -1499,9 +1696,134 @@
             <h2>Hook生成器</h2>
             <p>生成Theos Hook代码</p>
             <form id="hookGeneratorForm">
+            function showPage(pageName) {
+                const pages = ['converter', 'hook-generator', 'patch-generator'];
+                pages.forEach(page => {
+                    const pageElement = document.getElementById(page);
+                    if (pageElement) {
+                        pageElement.classList.toggle('active', page === pageName);
+                    }
+                });
+            }
+            function convertProxy() {
+                const input = document.getElementById('proxyInput').value;
+                const outputFormat = document.getElementById('outputFormat').value;
+                const outputElement = document.getElementById('proxyOutput');
+                outputElement.innerHTML = '转换结果: ' + input; // 这里应该添加实际的转换逻辑
+            }
+            function generateHook() {
+                const input = document.getElementById('hookInput').value;
+                const outputElement = document.getElementById('hookOutput');
+                outputElement.innerHTML = '生成的Hook代码: ' + input; // 这里应该添加实际的Hook生成逻辑
+            }
+            function generatePatch() {
+                const input = document.getElementById('patchInput').value;
+                const outputElement = document.getElementById('patchOutput');
+                outputElement.innerHTML = '生成的Patch代码: ' + input; // 这里应该添加实际的Patch生成逻辑
+            }
+        </script>
+        <div class="page-content active" id="converter">
+            <h2>代理转换</h2>
+            <p>将代理配置转换为不同格式</p>
+            <form id="proxyConverterForm">
+                <textarea id="proxyInput" placeholder="输入代理配置" rows="10" cols="50"></textarea>
+                <br>
+                <label for="outputFormat">输出格式:</label>
+                <select id="outputFormat">
+                    <option value="theos">Theos Hook</option>
+                    <option value="quantumultx">Quantumult X 重写脚本</option>
+                </select>
+                <br>
+                <button type="button" onclick="convertProxy()">转换</button>
+            </form>
+            <div id="proxyOutput"></div>
+        </div>
+        <div class="page-content" id="hook-generator">
+            <h2>Hook生成器</h2>
+            <p>生成Theos Hook代码</p>
+            <form id="hookGeneratorForm">
                 <textarea id="hookInput" placeholder="输入Hook信息" rows="10" cols="50"></textarea>
                 <br>
                 <button type="button" onclick="generateHook()">生成Hook</button>
+            </form>
+            <div id="hookOutput"></div>
+        </div>
+        <div class="page-content" id="patch-generator">
+            <h2>Patch生成器</h2>
+            <p>生成Theos Patch代码</p>
+            <form id="patchGeneratorForm">
+                <textarea id="patchInput" placeholder="输入Patch信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generatePatch()">生成Patch</button>
+            </form>
+            <div id="patchOutput"></div>
+        </div>
+        <script>
+            function showPage(pageName) {
+                const pages = ['converter', 'hook-generator', 'patch-generator'];
+                pages.forEach(page => {
+                    const pageElement = document.getElementById(page);
+                    if (pageElement) {
+                        pageElement.classList.toggle('active', page === pageName);
+                    }
+                });
+            }
+            function convertProxy() {
+                const input = document.getElementById('proxyInput').value;
+                const outputFormat = document.getElementById('outputFormat').value;
+                const outputElement = document.getElementById('proxyOutput');
+                outputElement.innerHTML = '转换结果: ' + input; // 这里应该添加实际的转换逻辑
+            }
+            function generateHook() {
+                const input = document.getElementById('hookInput').value;
+                const outputElement = document.getElementById('hookOutput');
+                outputElement.innerHTML = '生成的Hook代码: ' + input; // 这里应该添加实际的Hook生成逻辑
+            }
+            function generatePatch() {
+                const input = document.getElementById('patchInput').value;
+                const outputElement = document.getElementById('patchOutput');
+                outputElement.innerHTML = '生成的Patch代码: ' + input; // 这里应该添加实际的Patch生成逻辑
+            }
+        </script>
+        <div class="page-content active" id="converter">
+            <h2>代理转换</h2>
+            <p>将代理配置转换为不同格式</p>
+            <form id="proxyConverterForm">
+                <textarea id="proxyInput" placeholder="输入代理配置" rows="10" cols="50"></textarea>
+                <br>
+                <label for="outputFormat">输出格式:</label>
+                <select id="outputFormat">
+                    <option value="theos">Theos Hook</option>
+                    <option value="quantumultx">Quantumult X 重写脚本</option>
+                </select>
+                <br>
+                <button type="button" onclick="convertProxy()">转换</button>
+            </form>
+            <div id="proxyOutput"></div>
+        </div>
+        <div class="page-content" id="hook-generator">
+            <h2>Hook生成器</h2>
+            <p>生成Theos Hook代码</p>
+            <form id="hookGeneratorForm">
+                <textarea id="hookInput" placeholder="输入Hook信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generateHook()">生成Hook</button>
+            </form>
+            <div id="hookOutput"></div>
+        </div>
+        <div class="page-content" id="patch-generator">
+            <h2>Patch生成器</h2>
+            <p>生成Theos Patch代码</p>
+            <form id="patchGeneratorForm">
+                <textarea id="patchInput" placeholder="输入Patch信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generatePatch()">生成Patch</button>
+            </form>
+            <div id="patchOutput"></div>
+        </div>
+        <script>
+            function showPage(pageName) {
+                const pages = ['
             </form>
             <div id="hookOutput"></div>
         </div>
