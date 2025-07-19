@@ -253,7 +253,65 @@
         <!-- 将现有的转换器内容包装在页面容器中 -->
         <div id="converter-page" class="page-content active">
             <div class="converter-section">
-                <!-- 现有的四个section保持不变 -->
+                <!-- 输入区域 -->
+                <div class="section">
+                    <div class="section-title">📥 输入配置</div>
+                    <div class="format-selector">
+                        <select id="inputFormat">
+                            <option value="storm">Storm Sniffer</option>
+                            <option value="spider">Spider</option>
+                        </select>
+                    </div>
+                    <textarea id="inputArea" class="text-area" placeholder="请粘贴配置 JSON..."></textarea>
+                    <div class="controls">
+                        <button class="btn btn-generate" onclick="convertAndGenerate()">🚀 转换并生成</button>
+                        <button class="btn btn-clear" onclick="clearAll()">🗑️ 清空</button>
+                    </div>
+                    <div id="status" class="status" style="display: none;"></div>
+                </div>
+
+                <!-- 输出区域 -->
+                <div class="section">
+                    <div class="section-title">📤 转换结果</div>
+                    <div class="format-selector">
+                        <select id="outputFormat">
+                            <option value="spider">Spider</option>
+                            <option value="storm">Storm Sniffer</option>
+                        </select>
+                    </div>
+                    <textarea id="outputArea" class="text-area output-area" readonly placeholder="转换结果将显示在这里..."></textarea>
+                    <div class="controls">
+                        <button class="btn btn-copy" onclick="copyOutput()">📋 复制</button>
+                    </div>
+                </div>
+
+                <!-- Theos Hook 区域 -->
+                <div class="section">
+                    <div class="section-title">🔧 Theos Hook</div>
+                    <div class="auto-generate-info">
+                        💡 自动从配置中提取JSON字段修改规则，生成对应的Hook脚本
+                    </div>
+                    <textarea id="theosArea" class="text-area theos-area" readonly placeholder="Hook脚本将自动生成..."></textarea>
+                    <div class="controls">
+                        <button class="btn btn-generate" onclick="regenerateTheos()">🔄 重新生成</button>
+                        <button class="btn btn-copy" onclick="copyTheos()">📋 复制</button>
+                    </div>
+                    <div id="theosStatus" class="status" style="display: none;"></div>
+                </div>
+
+                <!-- Quantumult X 区域 -->
+                <div class="section">
+                    <div class="section-title">📱 Quantumult X</div>
+                    <div class="auto-generate-info">
+                        💡 自动生成Quantumult X重写脚本，支持JSON响应修改
+                    </div>
+                    <textarea id="quantumultArea" class="text-area quantumult-area" readonly placeholder="Quantumult X脚本将自动生成..."></textarea>
+                    <div class="controls">
+                        <button class="btn btn-generate" onclick="regenerateQuantumult()">🔄 重新生成</button>
+                        <button class="btn btn-copy" onclick="copyQuantumult()">📋 复制</button>
+                    </div>
+                    <div id="quantumultStatus" class="status" style="display: none;"></div>
+                </div>
             </div>
         </div>
         
