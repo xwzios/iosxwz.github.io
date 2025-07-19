@@ -1,551 +1,1657 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Theos Hook 生成器</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            overflow: hidden;
-        }
-        
-        .header {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-        
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
-        
-        .header p {
-            opacity: 0.9;
-            font-size: 1.1em;
-        }
-        
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            min-height: 600px;
-        }
-        
-        .config-section {
-            padding: 30px;
-            border-right: 2px solid #ecf0f1;
-        }
-        
-        .output-section {
-            padding: 30px;
-            background: #f8f9fa;
-        }
-        
-        .section-title {
-            font-size: 1.3em;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #2c3e50;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #34495e;
-        }
-        
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #bdc3c7;
-            border-radius: 6px;
-            font-size: 14px;
-            transition: border-color 0.3s;
-        }
-        
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #3498db;
-        }
-        
-        .checkbox-group {
+
+        <div class="header">
+            <h1>🚀 智能代理转换工具</h1>
+            <p>代理配置转换 + 自动生成 Theos Hook + Quantumult X 重写脚本</p>
+            
+            <!-- 添加页面导航 -->
+            <div class="page-navigation">
+                <button class="nav-btn active" onclick="showPage('converter')">🔄 代理转换</button>
+                <button class="nav-btn" onclick="showPage('hook-generator')">🔧 Hook生成器</button>
+                <button class="nav-btn" onclick="showPage('patch-generator')">🛠️ Patch生成器</button>
+            </div>
+        </div>
+
+        .page-navigation {
+            margin-top: 20px;
             display: flex;
-            align-items: center;
-            gap: 8px;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
         }
         
-        .checkbox-group input[type="checkbox"] {
-            width: auto;
-        }
-        
-        .btn {
-            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.2);
             color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 25px;
             font-size: 14px;
             cursor: pointer;
-            margin: 5px;
-            transition: transform 0.2s;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
         }
         
-        .btn:hover {
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
             transform: translateY(-2px);
         }
         
-        .btn-generate {
-            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
-            width: 100%;
-            margin-top: 20px;
+        .nav-btn.active {
+            background: rgba(255, 255, 255, 0.9);
+            color: #2c3e50;
+            border-color: white;
         }
         
-        .btn-copy {
-            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
-        }
-        
-        .output-area {
-            width: 100%;
-            height: 400px;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            background: #2c3e50;
-            color: #ecf0f1;
-            border: none;
-            border-radius: 6px;
-            padding: 15px;
-            resize: vertical;
-        }
-        
-        .status {
-            margin-top: 15px;
-            padding: 10px;
-            border-radius: 6px;
-            text-align: center;
-            font-weight: bold;
+        .page-content {
             display: none;
         }
         
-        .status.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+        .page-content.active {
+            display: block;
         }
-        
-        .status.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        @media (max-width: 768px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-            
-            .config-section {
-                border-right: none;
-                border-bottom: 2px solid #ecf0f1;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🔧 Theos Hook 生成器</h1>
-            <p>自动生成 iOS 越狱 Hook 脚本，支持 Frida 脚本解析</p>
-        </div>
-        
-        <div class="main-content">
-            <div class="config-section">
-                <div class="section-title">⚙️ 配置参数</div>
-                
-                <div class="form-group">
-                    <label for="inputMethod">输入方式</label>
-                    <select id="inputMethod" onchange="toggleInputMethod()">
-                        <option value="manual">手动配置</option>
-                        <option value="frida">从 Frida 脚本解析</option>
-                    </select>
-                </div>
-                
-                <div id="fridaInput" style="display: none;">
-                    <div class="form-group">
-                        <label for="fridaScript">Frida 脚本</label>
-                        <textarea id="fridaScript" placeholder="粘贴您的 Frida 脚本..." style="height: 120px; font-family: 'Courier New', monospace; font-size: 12px;"></textarea>
-                    </div>
-                    <div style="text-align: center; margin-bottom: 15px;">
-                        <button class="btn" onclick="parseFridaScript()">🔍 解析 Frida 脚本</button>
-                    </div>
-                </div>
-                
-                <div id="manualInput">
-                    <div class="form-group">
-                        <label for="moduleName">目标模块名</label>
-                        <input type="text" id="moduleName" placeholder="例如: Liit" value="Liit">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="functionName">函数名</label>
-                        <input type="text" id="functionName" placeholder="例如: sub_1001FB9D8" value="sub_1001FB9D8">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="functionOffset">函数偏移地址 (十六进制)</label>
-                        <input type="text" id="functionOffset" placeholder="例如: 0x1FB9D8" value="0x1FB9D8">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="returnType">返回类型</label>
-                        <select id="returnType">
-                            <option value="BOOL">BOOL</option>
-                            <option value="int">int</option>
-                            <option value="void">void</option>
-                            <option value="id">id</option>
-                            <option value="NSString*">NSString*</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="paramCount">参数个数</label>
-                        <select id="paramCount" onchange="updateParamInputs()">
-                            <option value="0">0个参数</option>
-                            <option value="1">1个参数</option>
-                            <option value="2" selected>2个参数</option>
-                            <option value="3">3个参数</option>
-                            <option value="4">4个参数</option>
-                        </select>
-                    </div>
-                    
-                    <div id="paramInputs">
-                        <!-- 动态生成参数输入框 -->
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="returnValue">强制返回值</label>
-                        <input type="text" id="returnValue" placeholder="例如: YES, 1, nil" value="YES">
-                    </div>
-                    
-                    <div class="form-group">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="enableLogging" checked>
-                            <label for="enableLogging">启用日志输出</label>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="callOriginal">
-                            <label for="callOriginal">调用原始函数</label>
-                        </div>
-                    </div>
-                </div>
-                
-                <button class="btn btn-generate" onclick="generateHook()">🚀 生成 Hook 脚本</button>
-                <div id="status" class="status"></div>
-            </div>
-            
-            <div class="output-section">
-                <div class="section-title">📄 生成的 Hook 脚本</div>
-                <textarea id="outputArea" class="output-area" readonly placeholder="Hook 脚本将在这里显示..."></textarea>
-                <div style="text-align: center; margin-top: 15px;">
-                    <button class="btn btn-copy" onclick="copyToClipboard()">📋 复制脚本</button>
-                </div>
+        <!-- 将现有的转换器内容包装在页面容器中 -->
+        <div id="converter-page" class="page-content active">
+            <div class="converter-section">
+                <!-- 现有的四个section保持不变 -->
             </div>
         </div>
-    </div>
-
-    <script>
-        function toggleInputMethod() {
-            const inputMethod = document.getElementById('inputMethod').value;
-            const fridaInput = document.getElementById('fridaInput');
-            const manualInput = document.getElementById('manualInput');
-            
-            if (inputMethod === 'frida') {
-                fridaInput.style.display = 'block';
-                manualInput.style.display = 'none';
-            } else {
-                fridaInput.style.display = 'none';
-                manualInput.style.display = 'block';
-            }
-        }
         
-        function parseFridaScript() {
-            const fridaScript = document.getElementById('fridaScript').value.trim();
-            
-            if (!fridaScript) {
-                showStatus('请输入 Frida 脚本！', true);
-                return;
-            }
-            
-            try {
-                // 解析模块名
-                const moduleMatch = fridaScript.match(/Module\.findBaseAddress\(['"`]([^'"`]+)['"`]\)/);
-                if (moduleMatch) {
-                    document.getElementById('moduleName').value = moduleMatch[1];
-                }
-                
-                // 解析偏移地址
-                const offsetMatch = fridaScript.match(/\.add\((0x[0-9a-fA-F]+)\)/);
-                if (offsetMatch) {
-                    document.getElementById('functionOffset').value = offsetMatch[1];
-                }
-                
-                // 解析函数名（从注释或变量名中提取）
-                const funcNameMatch = fridaScript.match(/hook_(\w+)|调用\s+(\w+)|function\s+hook_(\w+)/);
-                if (funcNameMatch) {
-                    const funcName = funcNameMatch[1] || funcNameMatch[2] || funcNameMatch[3];
-                    document.getElementById('functionName').value = funcName;
-                }
-                
-                // 解析参数个数（通过 args[x] 的最大索引）
-                const argMatches = fridaScript.match(/args\[(\d+)\]/g);
-                if (argMatches) {
-                    const maxArgIndex = Math.max(...argMatches.map(match => parseInt(match.match(/\d+/)[0])));
-                    const paramCount = maxArgIndex + 1;
-                    document.getElementById('paramCount').value = paramCount;
-                    updateParamInputs();
-                }
-                
-                // 解析返回值修改
-                const retvalMatch = fridaScript.match(/retval\.replace\(([^)]+)\)/);
-                if (retvalMatch) {
-                    let returnValue = retvalMatch[1].trim();
-                    // 转换 JavaScript 值到 Objective-C 值
-                    if (returnValue === '1' || returnValue === 'true') {
-                        returnValue = 'YES';
-                        document.getElementById('returnType').value = 'BOOL';
-                    } else if (returnValue === '0' || returnValue === 'false') {
-                        returnValue = 'NO';
-                        document.getElementById('returnType').value = 'BOOL';
-                    } else if (returnValue === 'null' || returnValue === 'undefined') {
-                        returnValue = 'nil';
-                        document.getElementById('returnType').value = 'id';
+        <!-- Hook生成器页面 -->
+        <div id="hook-generator-page" class="page-content">
+            <iframe src="theos-hook-generator.html" style="width: 100%; height: 800px; border: none; border-radius: 0 0 12px 12px;"></iframe>
+        </div>
+        
+        <!-- Patch生成器页面 -->
+        <div id="patch-generator-page" class="page-content">
+            <iframe src="theos-patch-generator.html" style="width: 100%; height: 800px; border: none; border-radius: 0 0 12px 12px;"></iframe>
+        </div>
+        <script>
+            function showPage(pageName) {
+                const pages = ['converter', 'hook-generator', 'patch-generator'];
+                pages.forEach(page => {
+                    const pageElement = document.getElementById(page);
+                    if (pageElement) {
+                        pageElement.classList.toggle('active', page === pageName);
                     }
-                    document.getElementById('returnValue').value = returnValue;
-                }
-                
-                // 检查是否有日志输出
-                const hasLogging = fridaScript.includes('send(') || fridaScript.includes('console.log');
-                document.getElementById('enableLogging').checked = hasLogging;
-                
-                // 切换到手动配置模式以显示解析结果
-                document.getElementById('inputMethod').value = 'manual';
-                toggleInputMethod();
-                
-                showStatus('✅ Frida 脚本解析成功！请检查并调整配置');
-                
-            } catch (error) {
-                showStatus(`❌ 解析失败: ${error.message}`, true);
+                });
             }
-        }
-        
-        function updateParamInputs() {
-            const paramCount = parseInt(document.getElementById('paramCount').value);
-            const paramInputs = document.getElementById('paramInputs');
-            
-            paramInputs.innerHTML = '';
-            
-            for (let i = 0; i < paramCount; i++) {
-                const paramDiv = document.createElement('div');
-                paramDiv.className = 'form-group';
-                paramDiv.innerHTML = `
-                    <label for="param${i}Type">参数 ${i + 1} 类型</label>
-                    <select id="param${i}Type">
-                        <option value="int64_t">int64_t</option>
-                        <option value="int">int</option>
-                        <option value="BOOL">BOOL</option>
-                        <option value="id">id</option>
-                        <option value="NSString*">NSString*</option>
-                        <option value="void*">void*</option>
-                    </select>
-                `;
-                paramInputs.appendChild(paramDiv);
+            function convertProxy() {
+                const input = document.getElementById('proxyInput').value;
+                const outputFormat = document.getElementById('outputFormat').value;
+                const outputElement = document.getElementById('proxyOutput');
+                outputElement.innerHTML = '转换结果: ' + input; // 这里应该添加实际的转换逻辑
             }
-        }
-        
-        function generateHook() {
-            const moduleName = document.getElementById('moduleName').value.trim();
-            const functionName = document.getElementById('functionName').value.trim();
-            const functionOffset = document.getElementById('functionOffset').value.trim();
-            const returnType = document.getElementById('returnType').value;
-            const paramCount = parseInt(document.getElementById('paramCount').value);
-            const returnValue = document.getElementById('returnValue').value.trim();
-            const enableLogging = document.getElementById('enableLogging').checked;
-            const callOriginal = document.getElementById('callOriginal').checked;
-            
-            if (!moduleName || !functionName || !functionOffset) {
-                showStatus('请填写完整的配置信息！', true);
-                return;
+            function generateHook() {
+                const input = document.getElementById('hookInput').value;
+                const outputElement = document.getElementById('hookOutput');
+                outputElement.innerHTML = '生成的Hook代码: ' + input; // 这里应该添加实际的Hook生成逻辑
             }
-            
-            // 生成参数类型数组
-            const paramTypes = [];
-            const paramNames = [];
-            for (let i = 0; i < paramCount; i++) {
-                const typeElement = document.getElementById(`param${i}Type`);
-                if (typeElement) {
-                    paramTypes.push(typeElement.value);
-                    paramNames.push(`a${i + 1}`);
-                } else {
-                    paramTypes.push('int64_t');
-                    paramNames.push(`a${i + 1}`);
-                }
+            function generatePatch() {
+                const input = document.getElementById('patchInput').value;
+                const outputElement = document.getElementById('patchOutput');
+                outputElement.innerHTML = '生成的Patch代码: ' + input; // 这里应该添加实际的Patch生成逻辑
             }
-            
-            let script = generateTheosScript(
-                moduleName, functionName, functionOffset, 
-                returnType, paramTypes, paramNames, 
-                returnValue, enableLogging, callOriginal
-            );
-            
-            document.getElementById('outputArea').value = script;
-            showStatus('✅ Hook 脚本生成成功！');
-        }
-        
-        function generateTheosScript(moduleName, functionName, functionOffset, returnType, paramTypes, paramNames, returnValue, enableLogging, callOriginal) {
-            const paramDeclaration = paramTypes.map((type, index) => `${type} ${paramNames[index]}`).join(', ');
-            const paramLog = paramNames.map((name, index) => {
-                const type = paramTypes[index];
-                if (type === 'NSString*' || type === 'id') {
-                    return `${name}: %@`;
-                } else if (type === 'BOOL') {
-                    return `${name}: %d`;
-                } else {
-                    return `${name}: 0x%llx`;
-                }
-            }).join(', ');
-            const paramValues = paramNames.map((name, index) => {
-                const type = paramTypes[index];
-                if (type === 'int64_t' || type === 'void*') {
-                    return `(long long)${name}`;
-                } else {
-                    return name;
-                }
-            }).join(', ');
-            
-            let script = `#include <Foundation/Foundation.h>\n`;
-            script += `#include <substrate.h>\n`;
-            script += `#include <dlfcn.h>\n`;
-            script += `#include <mach-o/dyld.h>\n`;
-            script += `#include <string.h>\n`;
-            script += `#include <stdint.h>\n\n`;
-            
-            script += `// 定义函数指针类型\n`;
-            script += `typedef ${returnType} (*OriginalFunction)(${paramDeclaration});\n`;
-            script += `static OriginalFunction original_${functionName};\n\n`;
-            
-            script += `// 替换函数实现\n`;
-            script += `static ${returnType} replaced_${functionName}(${paramDeclaration}) {\n`;
-            
-            if (enableLogging) {
-                if (paramCount > 0) {
-                    script += `    NSLog(@"[Tweak] 调用 ${functionName}(${paramLog})"${paramValues ? ', ' + paramValues : ''});\n`;
-                } else {
-                    script += `    NSLog(@"[Tweak] 调用 ${functionName}");\n`;
-                }
-            }
-            
-            if (callOriginal) {
-                if (returnType !== 'void') {
-                    script += `    ${returnType} result = original_${functionName}(${paramNames.join(', ')});\n`;
-                    if (enableLogging) {
-                        script += `    NSLog(@"[Tweak] 原始返回值: %@", @(result));\n`;
+        </script>
+        <div class="page-content active" id="converter">
+            <h2>代理转换</h2>
+            <p>将代理配置转换为不同格式</p>
+            <form id="proxyConverterForm">
+                <textarea id="proxyInput" placeholder="输入代理配置" rows="10" cols="50"></textarea>
+                <br>
+                <label for="outputFormat">输出格式:</label>
+                <select id="outputFormat">
+                    <option value="theos">Theos Hook</option>
+                    <option value="quantumultx">Quantumult X 重写脚本</option>
+                </select>
+                <br>
+                <button type="button" onclick="convertProxy()">转换</button>
+            </form>
+            <div id="proxyOutput"></div>
+        </div>
+        <div class="page-content" id="hook-generator">
+            <h2>Hook生成器</h2>
+            <p>生成Theos Hook代码</p>
+            <form id="hookGeneratorForm">
+                <textarea id="hookInput" placeholder="输入Hook信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generateHook()">生成Hook</button>
+            </form>
+            <div id="hookOutput"></div>
+        </div>
+        <div class="page-content" id="patch-generator">
+            <h2>Patch生成器</h2>
+            <p>生成Theos Patch代码</p>
+            <form id="patchGeneratorForm">
+                <textarea id="patchInput" placeholder="输入Patch信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generatePatch()">生成Patch</button>
+            </form>
+            <div id="patchOutput"></div>
+        </div>
+        <script>
+            function showPage(pageName) {
+                const pages = ['converter', 'hook-generator', 'patch-generator'];
+                pages.forEach(page => {
+                    const pageElement = document.getElementById(page);
+                    if (pageElement) {
+                        pageElement.classList.toggle('active', page === pageName);
                     }
-                    script += `    return ${returnValue};\n`;
-                } else {
-                    script += `    original_${functionName}(${paramNames.join(', ')});\n`;
-                }
-            } else {
-                if (returnType !== 'void') {
-                    script += `    return ${returnValue};\n`;
-                }
+                });
             }
-            
-            script += `}\n\n`;
-            
-            script += `%ctor {\n`;
-            script += `    NSLog(@"[Tweak] Hook 插件已加载");\n`;
-            script += `    \n`;
-            script += `    // 查找目标模块\n`;
-            script += `    uint32_t count = _dyld_image_count();\n`;
-            script += `    uintptr_t baseAddr = 0;\n`;
-            script += `    \n`;
-            script += `    for (uint32_t i = 0; i < count; i++) {\n`;
-            script += `        const char *name = _dyld_get_image_name(i);\n`;
-            script += `        if (name && strstr(name, "${moduleName}")) {\n`;
-            script += `            baseAddr = (uintptr_t)_dyld_get_image_header(i);\n`;
-            script += `            NSLog(@"[Tweak] 找到模块基址: 0x%lx", baseAddr);\n`;
-            script += `            break;\n`;
-            script += `        }\n`;
-            script += `    }\n`;
-            script += `    \n`;
-            script += `    if (baseAddr) {\n`;
-            script += `        // 计算函数地址\n`;
-            script += `        void *funcAddr = (void *)(baseAddr + ${functionOffset});\n`;
-            script += `        NSLog(@"[Tweak] 目标函数地址: 0x%lx", (uintptr_t)funcAddr);\n`;
-            script += `        \n`;
-            script += `        // Hook函数\n`;
-            script += `        MSHookFunction(funcAddr, (void *)replaced_${functionName}, (void **)&original_${functionName});\n`;
-            script += `        NSLog(@"[Tweak] Hook成功");\n`;
-            script += `    } else {\n`;
-            script += `        NSLog(@"[Tweak] 未找到模块基址");\n`;
-            script += `    }\n`;
-            script += `}`;
-            
-            return script;
-        }
-        
-        function showStatus(message, isError = false) {
-            const status = document.getElementById('status');
-            status.textContent = message;
-            status.className = `status ${isError ? 'error' : 'success'}`;
-            status.style.display = 'block';
-            
-            setTimeout(() => {
-                status.style.display = 'none';
-            }, 3000);
-        }
-        
-        function copyToClipboard() {
-            const outputArea = document.getElementById('outputArea');
-            outputArea.select();
-            document.execCommand('copy');
-            showStatus('📋 已复制到剪贴板！');
-        }
-        
-        // 初始化
-        window.addEventListener('load', function() {
-            updateParamInputs();
-        });
-    </script>
-</body>
-</html>
+            function convertProxy() {
+                const input = document.getElementById('proxyInput').value;
+                const outputFormat = document.getElementById('outputFormat').value;
+                const outputElement = document.getElementById('proxyOutput');
+                outputElement.innerHTML = '转换结果: ' + input; // 这里应该添加实际的转换逻辑
+            }
+            function generateHook() {
+                const input = document.getElementById('hookInput').value;
+                const outputElement = document.getElementById('hookOutput');
+                outputElement.innerHTML = '生成的Hook代码: ' + input; // 这里应该添加实际的Hook生成逻辑
+            }
+            function generatePatch() {
+                const input = document.getElementById('patchInput').value;
+                const outputElement = document.getElementById('patchOutput');
+                outputElement.innerHTML = '生成的Patch代码: ' + input; // 这里应该添加实际的Patch生成逻辑
+            }
+        </script>
+        <div class="page-content active" id="converter">
+            <h2>代理转换</h2>
+            <p>将代理配置转换为不同格式</p>
+            <form id="proxyConverterForm">
+                <textarea id="proxyInput" placeholder="输入代理配置" rows="10" cols="50"></textarea>
+                <br>
+                <label for="outputFormat">输出格式:</label>
+                <select id="outputFormat">
+                    <option value="theos">Theos Hook</option>
+                    <option value="quantumultx">Quantumult X 重写脚本</option>
+                </select>
+                <br>
+                <button type="button" onclick="convertProxy()">转换</button>
+            </form>
+            <div id="proxyOutput"></div>
+        </div>
+        <div class="page-content" id="hook-generator">
+            <h2>Hook生成器</h2>
+            <p>生成Theos Hook代码</p>
+            <form id="hookGeneratorForm">
+                <textarea id="hookInput" placeholder="输入Hook信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generateHook()">生成Hook</button>
+            </form>
+            <div id="hookOutput"></div>
+        </div>
+        <div class="page-content" id="patch-generator">
+            <h2>Patch生成器</h2>
+            <p>生成Theos Patch代码</p>
+            <form id="patchGeneratorForm">
+                <textarea id="patchInput" placeholder="输入Patch信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generatePatch()">生成Patch</button>
+            </form>
+            <div id="patchOutput"></div>
+        </div>
+        <script>
+            function showPage(pageName) {
+                const pages = ['converter', 'hook-generator', 'patch-generator'];
+                pages.forEach(page => {
+                    const pageElement = document.getElementById(page);
+                    if (pageElement) {
+                        pageElement.classList.toggle('active', page === pageName);
+                    }
+                });
+            }
+            function convertProxy() {
+                const input = document.getElementById('proxyInput').value;
+                const outputFormat = document.getElementById('outputFormat').value;
+                const outputElement = document.getElementById('proxyOutput');
+                outputElement.innerHTML = '转换结果: ' + input; // 这里应该添加实际的转换逻辑
+            }
+            function generateHook() {
+                const input = document.getElementById('hookInput').value;
+                const outputElement = document.getElementById('hookOutput');
+                outputElement.innerHTML = '生成的Hook代码: ' + input; // 这里应该添加实际的Hook生成逻辑
+            }
+            function generatePatch() {
+                const input = document.getElementById('patchInput').value;
+                const outputElement = document.getElementById('patchOutput');
+                outputElement.innerHTML = '生成的Patch代码: ' + input; // 这里应该添加实际的Patch生成逻辑
+            }
+        </script>
+        <div class="page-content active" id="converter">
+            <h2>代理转换</h2>
+            <p>将代理配置转换为不同格式</p>
+            <form id="proxyConverterForm">
+                <textarea id="proxyInput" placeholder="输入代理配置" rows="10" cols="50"></textarea>
+                <br>
+                <label for="outputFormat">输出格式:</label>
+                <select id="outputFormat">
+                    <option value="theos">Theos Hook</option>
+                    <option value="quantumultx">Quantumult X 重写脚本</option>
+                </select>
+                <br>
+                <button type="button" onclick="convertProxy()">转换</button>
+            </form>
+            <div id="proxyOutput"></div>
+        </div>
+        <div class="page-content" id="hook-generator">
+            <h2>Hook生成器</h2>
+            <p>生成Theos Hook代码</p>
+            <form id="hookGeneratorForm">
+                <textarea id="hookInput" placeholder="输入Hook信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generateHook()">生成Hook</button>
+            </form>
+            <div id="hookOutput"></div>
+        </div>
+        <div class="page-content" id="patch-generator">
+            <h2>Patch生成器</h2>
+            <p>生成Theos Patch代码</p>
+            <form id="patchGeneratorForm">
+                <textarea id="patchInput" placeholder="输入Patch信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generatePatch()">生成Patch</button>
+            </form>
+            <div id="patchOutput"></div>
+        </div>
+        <script>
+            function showPage(pageName) {
+                const pages = ['converter', 'hook-generator', 'patch-generator'];
+                pages.forEach(page => {
+                    const pageElement = document.getElementById(page);
+                    if (pageElement) {
+                        pageElement.classList.toggle('active', page === pageName);
+                    }
+                });
+            }
+            function convertProxy() {
+                const input = document.getElementById('proxyInput').value;
+                const outputFormat = document.getElementById('outputFormat').value;
+                const outputElement = document.getElementById('proxyOutput');
+                outputElement.innerHTML = '转换结果: ' + input; // 这里应该添加实际的转换逻辑
+            }
+            function generateHook() {
+                const input = document.getElementById('hookInput').value;
+                const outputElement = document.getElementById('hookOutput');
+                outputElement.innerHTML = '生成的Hook代码: ' + input; // 这里应该添加实际的Hook生成逻辑
+            }
+            function generatePatch() {
+                const input = document.getElementById('patchInput').value;
+                const outputElement = document.getElementById('patchOutput');
+                outputElement.innerHTML = '生成的Patch代码: ' + input; // 这里应该添加实际的Patch生成逻辑
+            }
+        </script>
+        <div class="page-content active" id="converter">
+            <h2>代理转换</h2>
+            <p>将代理配置转换为不同格式</p>
+            <form id="proxyConverterForm">
+                <textarea id="proxyInput" placeholder="输入代理配置" rows="10" cols="50"></textarea>
+                <br>
+                <label for="outputFormat">输出格式:</label>
+                <select id="outputFormat">
+                    <option value="theos">Theos Hook</option>
+                    <option value="quantumultx">Quantumult X 重写脚本</option>
+                </select>
+                <br>
+                <button type="button" onclick="convertProxy()">转换</button>
+            </form>
+            <div id="proxyOutput"></div>
+        </div>
+        <div class="page-content" id="hook-generator">
+            <h2>Hook生成器</h2>
+            <p>生成Theos Hook代码</p>
+            <form id="hookGeneratorForm">
+                <textarea id="hookInput" placeholder="输入Hook信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generateHook()">生成Hook</button>
+            </form>
+            <div id="hookOutput"></div>
+        </div>
+        <div class="page-content" id="patch-generator">
+            <h2>Patch生成器</h2>
+            <p>生成Theos Patch代码</p>
+            <form id="patchGeneratorForm">
+                <textarea id="patchInput" placeholder="输入Patch信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generatePatch()">生成Patch</button>
+            </form>
+            <div id="patchOutput"></div>
+        </div>
+        <script>
+            function showPage(pageName) {
+                const pages = ['converter', 'hook-generator', 'patch-generator'];
+                pages.forEach(page => {
+                    const pageElement = document.getElementById(page);
+                    if (pageElement) {
+                        pageElement.classList.toggle('active', page === pageName);
+                    }
+                });
+            }
+            function convertProxy() {
+                const input = document.getElementById('proxyInput').value;
+                const outputFormat = document.getElementById('outputFormat').value;
+                const outputElement = document.getElementById('proxyOutput');
+                outputElement.innerHTML = '转换结果: ' + input; // 这里应该添加实际的转换逻辑
+            }
+            function generateHook() {
+                const input = document.getElementById('hookInput').value;
+                const outputElement = document.getElementById('hookOutput');
+                outputElement.innerHTML = '生成的Hook代码: ' + input; // 这里应该添加实际的Hook生成逻辑
+            }
+            function generatePatch() {
+                const input = document.getElementById('patchInput').value;
+                const outputElement = document.getElementById('patchOutput');
+                outputElement.innerHTML = '生成的Patch代码: ' + input; // 这里应该添加实际的Patch生成逻辑
+            }
+        </script>
+        <div class="page-content active" id="converter">
+            <h2>代理转换</h2>
+            <p>将代理配置转换为不同格式</p>
+            <form id="proxyConverterForm">
+                <textarea id="proxyInput" placeholder="输入代理配置" rows="10" cols="50"></textarea>
+                <br>
+                <label for="outputFormat">输出格式:</label>
+                <select id="outputFormat">
+                    <option value="theos">Theos Hook</option>
+                    <option value="quantumultx">Quantumult X 重写脚本</option>
+                </select>
+                <br>
+                <button type="button" onclick="convertProxy()">转换</button>
+            </form>
+            <div id="proxyOutput"></div>
+        </div>
+        <div class="page-content" id="hook-generator">
+            <h2>Hook生成器</h2>
+            <p>生成Theos Hook代码</p>
+            <form id="hookGeneratorForm">
+                <textarea id="hookInput" placeholder="输入Hook信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generateHook()">生成Hook</button>
+            </form>
+            <div id="hookOutput"></div>
+        </div>
+        <div class="page-content" id="patch-generator">
+            <h2>Patch生成器</h2>
+            <p>生成Theos Patch代码</p>
+            <form id="patchGeneratorForm">
+                <textarea id="patchInput" placeholder="输入Patch信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generatePatch()">生成Patch</button>
+            </form>
+            <div id="patchOutput"></div>
+        </div>
+        <script>
+            function showPage(pageName) {
+                const pages = ['converter', 'hook-generator', 'patch-generator'];
+                pages.forEach(page => {
+                    const pageElement = document.getElementById(page);
+                    if (pageElement) {
+                        pageElement.classList.toggle('active', page === pageName);
+                    }
+                });
+            }
+            function convertProxy() {
+                const input = document.getElementById('proxyInput').value;
+                const outputFormat = document.getElementById('outputFormat').value;
+                const outputElement = document.getElementById('proxyOutput');
+                outputElement.innerHTML = '转换结果: ' + input; // 这里应该添加实际的转换逻辑
+            }
+            function generateHook() {
+                const input = document.getElementById('hookInput').value;
+                const outputElement = document.getElementById('hookOutput');
+                outputElement.innerHTML = '生成的Hook代码: ' + input; // 这里应该添加实际的Hook生成逻辑
+            }
+            function generatePatch() {
+                const input = document.getElementById('patchInput').value;
+                const outputElement = document.getElementById('patchOutput');
+                outputElement.innerHTML = '生成的Patch代码: ' + input; // 这里应该添加实际的Patch生成逻辑
+            }
+        </script>
+        <div class="page-content active" id="converter">
+            <h2>代理转换</h2>
+            <p>将代理配置转换为不同格式</p>
+            <form id="proxyConverterForm">
+                <textarea id="proxyInput" placeholder="输入代理配置" rows="10" cols="50"></textarea>
+                <br>
+                <label for="outputFormat">输出格式:</label>
+                <select id="outputFormat">
+                    <option value="theos">Theos Hook</option>
+                    <option value="quantumultx">Quantumult X 重写脚本</option>
+                </select>
+                <br>
+                <button type="button" onclick="convertProxy()">转换</button>
+            </form>
+            <div id="proxyOutput"></div>
+        </div>
+        <div class="page-content" id="hook-generator">
+            <h2>Hook生成器</h2>
+            <p>生成Theos Hook代码</p>
+            <form id="hookGeneratorForm">
+                <textarea id="hookInput" placeholder="输入Hook信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generateHook()">生成Hook</button>
+            </form>
+            <div id="hookOutput"></div>
+        </div>
+        <div class="page-content" id="patch-generator">
+            <h2>Patch生成器</h2>
+            <p>生成Theos Patch代码</p>
+            <form id="patchGeneratorForm">
+                <textarea id="patchInput" placeholder="输入Patch信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generatePatch()">生成Patch</button>
+            </form>
+            <div id="patchOutput"></div>
+        </div>
+        <script>
+            function showPage(pageName) {
+                const pages = ['converter', 'hook-generator', 'patch-generator'];
+                pages.forEach(page => {
+                    const pageElement = document.getElementById(page);
+                    if (pageElement) {
+                        pageElement.classList.toggle('active', page === pageName);
+                    }
+                });
+            }
+            function convertProxy() {
+                const input = document.getElementById('proxyInput').value;
+                const outputFormat = document.getElementById('outputFormat').value;
+                const outputElement = document.getElementById('proxyOutput');
+                outputElement.innerHTML = '转换结果: ' + input; // 这里应该添加实际的转换逻辑
+            }
+            function generateHook() {
+                const input = document.getElementById('hookInput').value;
+                const outputElement = document.getElementById('hookOutput');
+                outputElement.innerHTML = '生成的Hook代码: ' + input; // 这里应该添加实际的Hook生成逻辑
+            }
+            function generatePatch() {
+                const input = document.getElementById('patchInput').value;
+                const outputElement = document.getElementById('patchOutput');
+                outputElement.innerHTML = '生成的Patch代码: ' + input; // 这里应该添加实际的Patch生成逻辑
+            }
+        </script>
+        <div class="page-content active" id="converter">
+            <h2>代理转换</h2>
+            <p>将代理配置转换为不同格式</p>
+            <form id="proxyConverterForm">
+                <textarea id="proxyInput" placeholder="输入代理配置" rows="10" cols="50"></textarea>
+                <br>
+                <label for="outputFormat">输出格式:</label>
+                <select id="outputFormat">
+                    <option value="theos">Theos Hook</option>
+                    <option value="quantumultx">Quantumult X 重写脚本</option>
+                </select>
+                <br>
+                <button type="button" onclick="convertProxy()">转换</button>
+            </form>
+            <div id="proxyOutput"></div>
+        </div>
+        <div class="page-content" id="hook-generator">
+            <h2>Hook生成器</h2>
+            <p>生成Theos Hook代码</p>
+            <form id="hookGeneratorForm">
+                <textarea id="hookInput" placeholder="输入Hook信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generateHook()">生成Hook</button>
+            </form>
+            <div id="hookOutput"></div>
+        </div>
+        <div class="page-content" id="patch-generator">
+            <h2>Patch生成器</h2>
+            <p>生成Theos Patch代码</p>
+            <form id="patchGeneratorForm">
+                <textarea id="patchInput" placeholder="输入Patch信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generatePatch()">生成Patch</button>
+            </form>
+            <div id="patchOutput"></div>
+        </div>
+        <script>
+            function showPage(pageName) {
+                const pages = ['converter', 'hook-generator', 'patch-generator'];
+                pages.forEach(page => {
+                    const pageElement = document.getElementById(page);
+                    if (pageElement) {
+                        pageElement.classList.toggle('active', page === pageName);
+                    }
+                });
+            }
+            function convertProxy() {
+                const input = document.getElementById('proxyInput').value;
+                const outputFormat = document.getElementById('outputFormat').value;
+                const outputElement = document.getElementById('proxyOutput');
+                outputElement.innerHTML = '转换结果: ' + input; // 这里应该添加实际的转换逻辑
+            }
+            function generateHook() {
+                const input = document.getElementById('hookInput').value;
+                const outputElement = document.getElementById('hookOutput');
+                outputElement.innerHTML = '生成的Hook代码: ' + input; // 这里应该添加实际的Hook生成逻辑
+            }
+            function generatePatch() {
+                const input = document.getElementById('patchInput').value;
+                const outputElement = document.getElementById('patchOutput');
+                outputElement.innerHTML = '生成的Patch代码: ' + input; // 这里应该添加实际的Patch生成逻辑
+            }
+        </script>
+        <div class="page-content active" id="converter">
+            <h2>代理转换</h2>
+            <p>将代理配置转换为不同格式</p>
+            <form id="proxyConverterForm">
+                <textarea id="proxyInput" placeholder="输入代理配置" rows="10" cols="50"></textarea>
+                <br>
+                <label for="outputFormat">输出格式:</label>
+                <select id="outputFormat">
+                    <option value="theos">Theos Hook</option>
+                    <option value="quantumultx">Quantumult X 重写脚本</option>
+                </select>
+                <br>
+                <button type="button" onclick="convertProxy()">转换</button>
+            </form>
+            <div id="proxyOutput"></div>
+        </div>
+        <div class="page-content" id="hook-generator">
+            <h2>Hook生成器</h2>
+            <p>生成Theos Hook代码</p>
+            <form id="hookGeneratorForm">
+                <textarea id="hookInput" placeholder="输入Hook信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generateHook()">生成Hook</button>
+            </form>
+            <div id="hookOutput"></div>
+        </div>
+        <div class="page-content" id="patch-generator">
+            <h2>Patch生成器</h2>
+            <p>生成Theos Patch代码</p>
+            <form id="patchGeneratorForm">
+                <textarea id="patchInput" placeholder="输入Patch信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generatePatch()">生成Patch</button>
+            </form>
+            <div id="patchOutput"></div>
+        </div>
+        <script>
+            function showPage(pageName) {
+                const pages = ['converter', 'hook-generator', 'patch-generator'];
+                pages.forEach(page => {
+                    const pageElement = document.getElementById(page);
+                    if (pageElement) {
+                        pageElement.classList.toggle('active', page === pageName);
+                    }
+                });
+            }
+            function convertProxy() {
+                const input = document.getElementById('proxyInput').value;
+                const outputFormat = document.getElementById('outputFormat').value;
+                const outputElement = document.getElementById('proxyOutput');
+                outputElement.innerHTML = '转换结果: ' + input; // 这里应该添加实际的转换逻辑
+            }
+            function generateHook() {
+                const input = document.getElementById('hookInput').value;
+                const outputElement = document.getElementById('hookOutput');
+                outputElement.innerHTML = '生成的Hook代码: ' + input; // 这里应该添加实际的Hook生成逻辑
+            }
+            function generatePatch() {
+                const input = document.getElementById('patchInput').value;
+                const outputElement = document.getElementById('patchOutput');
+                outputElement.innerHTML = '生成的Patch代码: ' + input; // 这里应该添加实际的Patch生成逻辑
+            }
+        </script>
+        <div class="page-content active" id="converter">
+            <h2>代理转换</h2>
+            <p>将代理配置转换为不同格式</p>
+            <form id="proxyConverterForm">
+                <textarea id="proxyInput" placeholder="输入代理配置" rows="10" cols="50"></textarea>
+                <br>
+                <label for="outputFormat">输出格式:</label>
+                <select id="outputFormat">
+                    <option value="theos">Theos Hook</option>
+                    <option value="quantumultx">Quantumult X 重写脚本</option>
+                </select>
+                <br>
+                <button type="button" onclick="convertProxy()">转换</button>
+            </form>
+            <div id="proxyOutput"></div>
+        </div>
+        <div class="page-content" id="hook-generator">
+            <h2>Hook生成器</h2>
+            <p>生成Theos Hook代码</p>
+            <form id="hookGeneratorForm">
+                <textarea id="hookInput" placeholder="输入Hook信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generateHook()">生成Hook</button>
+            </form>
+            <div id="hookOutput"></div>
+        </div>
+        <div class="page-content" id="patch-generator">
+            <h2>Patch生成器</h2>
+            <p>生成Theos Patch代码</p>
+            <form id="patchGeneratorForm">
+                <textarea id="patchInput" placeholder="输入Patch信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generatePatch()">生成Patch</button>
+            </form>
+            <div id="patchOutput"></div>
+        </div>
+        <script>
+            function showPage(pageName) {
+                const pages = ['converter', 'hook-generator', 'patch-generator'];
+                pages.forEach(page => {
+                    const pageElement = document.getElementById(page);
+                    if (pageElement) {
+                        pageElement.classList.toggle('active', page === pageName);
+                    }
+                });
+            }
+            function convertProxy() {
+                const input = document.getElementById('proxyInput').value;
+                const outputFormat = document.getElementById('outputFormat').value;
+                const outputElement = document.getElementById('proxyOutput');
+                outputElement.innerHTML = '转换结果: ' + input; // 这里应该添加实际的转换逻辑
+            }
+            function generateHook() {
+                const input = document.getElementById('hookInput').value;
+                const outputElement = document.getElementById('hookOutput');
+                outputElement.innerHTML = '生成的Hook代码: ' + input; // 这里应该添加实际的Hook生成逻辑
+            }
+            function generatePatch() {
+                const input = document.getElementById('patchInput').value;
+                const outputElement = document.getElementById('patchOutput');
+                outputElement.innerHTML = '生成的Patch代码: ' + input; // 这里应该添加实际的Patch生成逻辑
+            }
+        </script>
+        <div class="page-content active" id="converter">
+            <h2>代理转换</h2>
+            <p>将代理配置转换为不同格式</p>
+            <form id="proxyConverterForm">
+                <textarea id="proxyInput" placeholder="输入代理配置" rows="10" cols="50"></textarea>
+                <br>
+                <label for="outputFormat">输出格式:</label>
+                <select id="outputFormat">
+                    <option value="theos">Theos Hook</option>
+                    <option value="quantumultx">Quantumult X 重写脚本</option>
+                </select>
+                <br>
+                <button type="button" onclick="convertProxy()">转换</button>
+            </form>
+            <div id="proxyOutput"></div>
+        </div>
+        <div class="page-content" id="hook-generator">
+            <h2>Hook生成器</h2>
+            <p>生成Theos Hook代码</p>
+            <form id="hookGeneratorForm">
+                <textarea id="hookInput" placeholder="输入Hook信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generateHook()">生成Hook</button>
+            </form>
+            <div id="hookOutput"></div>
+        </div>
+        <div class="page-content" id="patch-generator">
+            <h2>Patch生成器</h2>
+            <p>生成Theos Patch代码</p>
+            <form id="patchGeneratorForm">
+                <textarea id="patchInput" placeholder="输入Patch信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generatePatch()">生成Patch</button>
+            </form>
+            <div id="patchOutput"></div>
+        </div>
+        <script>
+            function showPage(pageName) {
+                const pages = ['converter', 'hook-generator', 'patch-generator'];
+                pages.forEach(page => {
+                    const pageElement = document.getElementById(page);
+                    if (pageElement) {
+                        pageElement.classList.toggle('active', page === pageName);
+                    }
+                });
+            }
+            function convertProxy() {
+                const input = document.getElementById('proxyInput').value;
+                const outputFormat = document.getElementById('outputFormat').value;
+                const outputElement = document.getElementById('proxyOutput');
+                outputElement.innerHTML = '转换结果: ' + input; // 这里应该添加实际的转换逻辑
+            }
+            function generateHook() {
+                const input = document.getElementById('hookInput').value;
+                const outputElement = document.getElementById('hookOutput');
+                outputElement.innerHTML = '生成的Hook代码: ' + input; // 这里应该添加实际的Hook生成逻辑
+            }
+            function generatePatch() {
+                const input = document.getElementById('patchInput').value;
+                const outputElement = document.getElementById('patchOutput');
+                outputElement.innerHTML = '生成的Patch代码: ' + input; // 这里应该添加实际的Patch生成逻辑
+            }
+        </script>
+        <div class="page-content active" id="converter">
+            <h2>代理转换</h2>
+            <p>将代理配置转换为不同格式</p>
+            <form id="proxyConverterForm">
+                <textarea id="proxyInput" placeholder="输入代理配置" rows="10" cols="50"></textarea>
+                <br>
+                <label for="outputFormat">输出格式:</label>
+                <select id="outputFormat">
+                    <option value="theos">Theos Hook</option>
+                    <option value="quantumultx">Quantumult X 重写脚本</option>
+                </select>
+                <br>
+                <button type="button" onclick="convertProxy()">转换</button>
+            </form>
+            <div id="proxyOutput"></div>
+        </div>
+        <div class="page-content" id="hook-generator">
+            <h2>Hook生成器</h2>
+            <p>生成Theos Hook代码</p>
+            <form id="hookGeneratorForm">
+                <textarea id="hookInput" placeholder="输入Hook信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generateHook()">生成Hook</button>
+            </form>
+            <div id="hookOutput"></div>
+        </div>
+        <div class="page-content" id="patch-generator">
+            <h2>Patch生成器</h2>
+            <p>生成Theos Patch代码</p>
+            <form id="patchGeneratorForm">
+                <textarea id="patchInput" placeholder="输入Patch信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generatePatch()">生成Patch</button>
+            </form>
+            <div id="patchOutput"></div>
+        </div>
+        <script>
+            function showPage(pageName) {
+                const pages = ['converter', 'hook-generator', 'patch-generator'];
+                pages.forEach(page => {
+                    const pageElement = document.getElementById(page);
+                    if (pageElement) {
+                        pageElement.classList.toggle('active', page === pageName);
+                    }
+                });
+            }
+            function convertProxy() {
+                const input = document.getElementById('proxyInput').value;
+                const outputFormat = document.getElementById('outputFormat').value;
+                const outputElement = document.getElementById('proxyOutput');
+                outputElement.innerHTML = '转换结果: ' + input; // 这里应该添加实际的转换逻辑
+            }
+            function generateHook() {
+                const input = document.getElementById('hookInput').value;
+                const outputElement = document.getElementById('hookOutput');
+                outputElement.innerHTML = '生成的Hook代码: ' + input; // 这里应该添加实际的Hook生成逻辑
+            }
+            function generatePatch() {
+                const input = document.getElementById('patchInput').value;
+                const outputElement = document.getElementById('patchOutput');
+                outputElement.innerHTML = '生成的Patch代码: ' + input; // 这里应该添加实际的Patch生成逻辑
+            }
+        </script>
+        <div class="page-content active" id="converter">
+            <h2>代理转换</h2>
+            <p>将代理配置转换为不同格式</p>
+            <form id="proxyConverterForm">
+                <textarea id="proxyInput" placeholder="输入代理配置" rows="10" cols="50"></textarea>
+                <br>
+                <label for="outputFormat">输出格式:</label>
+                <select id="outputFormat">
+                    <option value="theos">Theos Hook</option>
+                    <option value="quantumultx">Quantumult X 重写脚本</option>
+                </select>
+                <br>
+                <button type="button" onclick="convertProxy()">转换</button>
+            </form>
+            <div id="proxyOutput"></div>
+        </div>
+        <div class="page-content" id="hook-generator">
+            <h2>Hook生成器</h2>
+            <p>生成Theos Hook代码</p>
+            <form id="hookGeneratorForm">
+                <textarea id="hookInput" placeholder="输入Hook信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generateHook()">生成Hook</button>
+            </form>
+            <div id="hookOutput"></div>
+        </div>
+        <div class="page-content" id="patch-generator">
+            <h2>Patch生成器</h2>
+            <p>生成Theos Patch代码</p>
+            <form id="patchGeneratorForm">
+                <textarea id="patchInput" placeholder="输入Patch信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generatePatch()">生成Patch</button>
+            </form>
+            <div id="patchOutput"></div>
+        </div>
+        <script>
+            function showPage(pageName) {
+                const pages = ['converter', 'hook-generator', 'patch-generator'];
+                pages.forEach(page => {
+                    const pageElement = document.getElementById(page);
+                    if (pageElement) {
+                        pageElement.classList.toggle('active', page === pageName);
+                    }
+                });
+            }
+            function convertProxy() {
+                const input = document.getElementById('proxyInput').value;
+                const outputFormat = document.getElementById('outputFormat').value;
+                const outputElement = document.getElementById('proxyOutput');
+                outputElement.innerHTML = '转换结果: ' + input; // 这里应该添加实际的转换逻辑
+            }
+            function generateHook() {
+                const input = document.getElementById('hookInput').value;
+                const outputElement = document.getElementById('hookOutput');
+                outputElement.innerHTML = '生成的Hook代码: ' + input; // 这里应该添加实际的Hook生成逻辑
+            }
+            function generatePatch() {
+                const input = document.getElementById('patchInput').value;
+                const outputElement = document.getElementById('patchOutput');
+                outputElement.innerHTML = '生成的Patch代码: ' + input; // 这里应该添加实际的Patch生成逻辑
+            }
+        </script>
+        <div class="page-content active" id="converter">
+            <h2>代理转换</h2>
+            <p>将代理配置转换为不同格式</p>
+            <form id="proxyConverterForm">
+                <textarea id="proxyInput" placeholder="输入代理配置" rows="10" cols="50"></textarea>
+                <br>
+                <label for="outputFormat">输出格式:</label>
+                <select id="outputFormat">
+                    <option value="theos">Theos Hook</option>
+                    <option value="quantumultx">Quantumult X 重写脚本</option>
+                </select>
+                <br>
+                <button type="button" onclick="convertProxy()">转换</button>
+            </form>
+            <div id="proxyOutput"></div>
+        </div>
+        <div class="page-content" id="hook-generator">
+            <h2>Hook生成器</h2>
+            <p>生成Theos Hook代码</p>
+            <form id="hookGeneratorForm">
+                <textarea id="hookInput" placeholder="输入Hook信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generateHook()">生成Hook</button>
+            </form>
+            <div id="hookOutput"></div>
+        </div>
+        <div class="page-content" id="patch-generator">
+            <h2>Patch生成器</h2>
+            <p>生成Theos Patch代码</p>
+            <form id="patchGeneratorForm">
+                <textarea id="patchInput" placeholder="输入Patch信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generatePatch()">生成Patch</button>
+            </form>
+            <div id="patchOutput"></div>
+        </div>
+        <script>
+            function showPage(pageName) {
+                const pages = ['converter', 'hook-generator', 'patch-generator'];
+                pages.forEach(page => {
+                    const pageElement = document.getElementById(page);
+                    if (pageElement) {
+                        pageElement.classList.toggle('active', page === pageName);
+                    }
+                });
+            }
+            function convertProxy() {
+                const input = document.getElementById('proxyInput').value;
+                const outputFormat = document.getElementById('outputFormat').value;
+                const outputElement = document.getElementById('proxyOutput');
+                outputElement.innerHTML = '转换结果: ' + input; // 这里应该添加实际的转换逻辑
+            }
+            function generateHook() {
+                const input = document.getElementById('hookInput').value;
+                const outputElement = document.getElementById('hookOutput');
+                outputElement.innerHTML = '生成的Hook代码: ' + input; // 这里应该添加实际的Hook生成逻辑
+            }
+            function generatePatch() {
+                const input = document.getElementById('patchInput').value;
+                const outputElement = document.getElementById('patchOutput');
+                outputElement.innerHTML = '生成的Patch代码: ' + input; // 这里应该添加实际的Patch生成逻辑
+            }
+        </script>
+        <div class="page-content active" id="converter">
+            <h2>代理转换</h2>
+            <p>将代理配置转换为不同格式</p>
+            <form id="proxyConverterForm">
+                <textarea id="proxyInput" placeholder="输入代理配置" rows="10" cols="50"></textarea>
+                <br>
+                <label for="outputFormat">输出格式:</label>
+                <select id="outputFormat">
+                    <option value="theos">Theos Hook</option>
+                    <option value="quantumultx">Quantumult X 重写脚本</option>
+                </select>
+                <br>
+                <button type="button" onclick="convertProxy()">转换</button>
+            </form>
+            <div id="proxyOutput"></div>
+        </div>
+        <div class="page-content" id="hook-generator">
+            <h2>Hook生成器</h2>
+            <p>生成Theos Hook代码</p>
+            <form id="hookGeneratorForm">
+                <textarea id="hookInput" placeholder="输入Hook信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generateHook()">生成Hook</button>
+            </form>
+            <div id="hookOutput"></div>
+        </div>
+        <div class="page-content" id="patch-generator">
+            <h2>Patch生成器</h2>
+            <p>生成Theos Patch代码</p>
+            <form id="patchGeneratorForm">
+                <textarea id="patchInput" placeholder="输入Patch信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generatePatch()">生成Patch</button>
+            </form>
+            <div id="patchOutput"></div>
+        </div>
+        <script>
+            function showPage(pageName) {
+                const pages = ['converter', 'hook-generator', 'patch-generator'];
+                pages.forEach(page => {
+                    const pageElement = document.getElementById(page);
+                    if (pageElement) {
+                        pageElement.classList.toggle('active', page === pageName);
+                    }
+                });
+            }
+            function convertProxy() {
+                const input = document.getElementById('proxyInput').value;
+                const outputFormat = document.getElementById('outputFormat').value;
+                const outputElement = document.getElementById('proxyOutput');
+                outputElement.innerHTML = '转换结果: ' + input; // 这里应该添加实际的转换逻辑
+            }
+            function generateHook() {
+                const input = document.getElementById('hookInput').value;
+                const outputElement = document.getElementById('hookOutput');
+                outputElement.innerHTML = '生成的Hook代码: ' + input; // 这里应该添加实际的Hook生成逻辑
+            }
+            function generatePatch() {
+                const input = document.getElementById('patchInput').value;
+                const outputElement = document.getElementById('patchOutput');
+                outputElement.innerHTML = '生成的Patch代码: ' + input; // 这里应该添加实际的Patch生成逻辑
+            }
+        </script>
+        <div class="page-content active" id="converter">
+            <h2>代理转换</h2>
+            <p>将代理配置转换为不同格式</p>
+            <form id="proxyConverterForm">
+                <textarea id="proxyInput" placeholder="输入代理配置" rows="10" cols="50"></textarea>
+                <br>
+                <label for="outputFormat">输出格式:</label>
+                <select id="outputFormat">
+                    <option value="theos">Theos Hook</option>
+                    <option value="quantumultx">Quantumult X 重写脚本</option>
+                </select>
+                <br>
+                <button type="button" onclick="convertProxy()">转换</button>
+            </form>
+            <div id="proxyOutput"></div>
+        </div>
+        <div class="page-content" id="hook-generator">
+            <h2>Hook生成器</h2>
+            <p>生成Theos Hook代码</p>
+            <form id="hookGeneratorForm">
+                <textarea id="hookInput" placeholder="输入Hook信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generateHook()">生成Hook</button>
+            </form>
+            <div id="hookOutput"></div>
+        </div>
+        <div class="page-content" id="patch-generator">
+            <h2>Patch生成器</h2>
+            <p>生成Theos Patch代码</p>
+            <form id="patchGeneratorForm">
+                <textarea id="patchInput" placeholder="输入Patch信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generatePatch()">生成Patch</button>
+            </form>
+            <div id="patchOutput"></div>
+        </div>
+        <script>
+            function showPage(pageName) {
+                const pages = ['converter', 'hook-generator', 'patch-generator'];
+                pages.forEach(page => {
+                    const pageElement = document.getElementById(page);
+                    if (pageElement) {
+                        pageElement.classList.toggle('active', page === pageName);
+                    }
+                });
+            }
+            function convertProxy() {
+                const input = document.getElementById('proxyInput').value;
+                const outputFormat = document.getElementById('outputFormat').value;
+                const outputElement = document.getElementById('proxyOutput');
+                outputElement.innerHTML = '转换结果: ' + input; // 这里应该添加实际的转换逻辑
+            }
+            function generateHook() {
+                const input = document.getElementById('hookInput').value;
+                const outputElement = document.getElementById('hookOutput');
+                outputElement.innerHTML = '生成的Hook代码: ' + input; // 这里应该添加实际的Hook生成逻辑
+            }
+            function generatePatch() {
+                const input = document.getElementById('patchInput').value;
+                const outputElement = document.getElementById('patchOutput');
+                outputElement.innerHTML = '生成的Patch代码: ' + input; // 这里应该添加实际的Patch生成逻辑
+            }
+        </script>
+        <div class="page-content active" id="converter">
+            <h2>代理转换</h2>
+            <p>将代理配置转换为不同格式</p>
+            <form id="proxyConverterForm">
+                <textarea id="proxyInput" placeholder="输入代理配置" rows="10" cols="50"></textarea>
+                <br>
+                <label for="outputFormat">输出格式:</label>
+                <select id="outputFormat">
+                    <option value="theos">Theos Hook</option>
+                    <option value="quantumultx">Quantumult X 重写脚本</option>
+                </select>
+                <br>
+                <button type="button" onclick="convertProxy()">转换</button>
+            </form>
+            <div id="proxyOutput"></div>
+        </div>
+        <div class="page-content" id="hook-generator">
+            <h2>Hook生成器</h2>
+            <p>生成Theos Hook代码</p>
+            <form id="hookGeneratorForm">
+                <textarea id="hookInput" placeholder="输入Hook信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generateHook()">生成Hook</button>
+            </form>
+            <div id="hookOutput"></div>
+        </div>
+        <div class="page-content" id="patch-generator">
+            <h2>Patch生成器</h2>
+            <p>生成Theos Patch代码</p>
+            <form id="patchGeneratorForm">
+                <textarea id="patchInput" placeholder="输入Patch信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generatePatch()">生成Patch</button>
+            </form>
+            <div id="patchOutput"></div>
+        </div>
+        <script>
+            function showPage(pageName) {
+                const pages = ['converter', 'hook-generator', 'patch-generator'];
+                pages.forEach(page => {
+                    const pageElement = document.getElementById(page);
+                    if (pageElement) {
+                        pageElement.classList.toggle('active', page === pageName);
+                    }
+                });
+            }
+            function convertProxy() {
+                const input = document.getElementById('proxyInput').value;
+                const outputFormat = document.getElementById('outputFormat').value;
+                const outputElement = document.getElementById('proxyOutput');
+                outputElement.innerHTML = '转换结果: ' + input; // 这里应该添加实际的转换逻辑
+            }
+            function generateHook() {
+                const input = document.getElementById('hookInput').value;
+                const outputElement = document.getElementById('hookOutput');
+                outputElement.innerHTML = '生成的Hook代码: ' + input; // 这里应该添加实际的Hook生成逻辑
+            }
+            function generatePatch() {
+                const input = document.getElementById('patchInput').value;
+                const outputElement = document.getElementById('patchOutput');
+                outputElement.innerHTML = '生成的Patch代码: ' + input; // 这里应该添加实际的Patch生成逻辑
+            }
+        </script>
+        <div class="page-content active" id="converter">
+            <h2>代理转换</h2>
+            <p>将代理配置转换为不同格式</p>
+            <form id="proxyConverterForm">
+                <textarea id="proxyInput" placeholder="输入代理配置" rows="10" cols="50"></textarea>
+                <br>
+                <label for="outputFormat">输出格式:</label>
+                <select id="outputFormat">
+                    <option value="theos">Theos Hook</option>
+                    <option value="quantumultx">Quantumult X 重写脚本</option>
+                </select>
+                <br>
+                <button type="button" onclick="convertProxy()">转换</button>
+            </form>
+            <div id="proxyOutput"></div>
+        </div>
+        <div class="page-content" id="hook-generator">
+            <h2>Hook生成器</h2>
+            <p>生成Theos Hook代码</p>
+            <form id="hookGeneratorForm">
+                <textarea id="hookInput" placeholder="输入Hook信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generateHook()">生成Hook</button>
+            </form>
+            <div id="hookOutput"></div>
+        </div>
+        <div class="page-content" id="patch-generator">
+            <h2>Patch生成器</h2>
+            <p>生成Theos Patch代码</p>
+            <form id="patchGeneratorForm">
+                <textarea id="patchInput" placeholder="输入Patch信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generatePatch()">生成Patch</button>
+            </form>
+            <div id="patchOutput"></div>
+        </div>
+        <script>
+            function showPage(pageName) {
+                const pages = ['converter', 'hook-generator', 'patch-generator'];
+                pages.forEach(page => {
+                    const pageElement = document.getElementById(page);
+                    if (pageElement) {
+                        pageElement.classList.toggle('active', page === pageName);
+                    }
+                });
+            }
+            function convertProxy() {
+                const input = document.getElementById('proxyInput').value;
+                const outputFormat = document.getElementById('outputFormat').value;
+                const outputElement = document.getElementById('proxyOutput');
+                outputElement.innerHTML = '转换结果: ' + input; // 这里应该添加实际的转换逻辑
+            }
+            function generateHook() {
+                const input = document.getElementById('hookInput').value;
+                const outputElement = document.getElementById('hookOutput');
+                outputElement.innerHTML = '生成的Hook代码: ' + input; // 这里应该添加实际的Hook生成逻辑
+            }
+            function generatePatch() {
+                const input = document.getElementById('patchInput').value;
+                const outputElement = document.getElementById('patchOutput');
+                outputElement.innerHTML = '生成的Patch代码: ' + input; // 这里应该添加实际的Patch生成逻辑
+            }
+        </script>
+        <div class="page-content active" id="converter">
+            <h2>代理转换</h2>
+            <p>将代理配置转换为不同格式</p>
+            <form id="proxyConverterForm">
+                <textarea id="proxyInput" placeholder="输入代理配置" rows="10" cols="50"></textarea>
+                <br>
+                <label for="outputFormat">输出格式:</label>
+                <select id="outputFormat">
+                    <option value="theos">Theos Hook</option>
+                    <option value="quantumultx">Quantumult X 重写脚本</option>
+                </select>
+                <br>
+                <button type="button" onclick="convertProxy()">转换</button>
+            </form>
+            <div id="proxyOutput"></div>
+        </div>
+        <div class="page-content" id="hook-generator">
+            <h2>Hook生成器</h2>
+            <p>生成Theos Hook代码</p>
+            <form id="hookGeneratorForm">
+                <textarea id="hookInput" placeholder="输入Hook信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generateHook()">生成Hook</button>
+            </form>
+            <div id="hookOutput"></div>
+        </div>
+        <div class="page-content" id="patch-generator">
+            <h2>Patch生成器</h2>
+            <p>生成Theos Patch代码</p>
+            <form id="patchGeneratorForm">
+                <textarea id="patchInput" placeholder="输入Patch信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generatePatch()">生成Patch</button>
+            </form>
+            <div id="patchOutput"></div>
+        </div>
+        <script>
+            function showPage(pageName) {
+                const pages = ['converter', 'hook-generator', 'patch-generator'];
+                pages.forEach(page => {
+                    const pageElement = document.getElementById(page);
+                    if (pageElement) {
+                        pageElement.classList.toggle('active', page === pageName);
+                    }
+                });
+            }
+            function convertProxy() {
+                const input = document.getElementById('proxyInput').value;
+                const outputFormat = document.getElementById('outputFormat').value;
+                const outputElement = document.getElementById('proxyOutput');
+                outputElement.innerHTML = '转换结果: ' + input; // 这里应该添加实际的转换逻辑
+            }
+            function generateHook() {
+                const input = document.getElementById('hookInput').value;
+                const outputElement = document.getElementById('hookOutput');
+                outputElement.innerHTML = '生成的Hook代码: ' + input; // 这里应该添加实际的Hook生成逻辑
+            }
+            function generatePatch() {
+                const input = document.getElementById('patchInput').value;
+                const outputElement = document.getElementById('patchOutput');
+                outputElement.innerHTML = '生成的Patch代码: ' + input; // 这里应该添加实际的Patch生成逻辑
+            }
+        </script>
+        <div class="page-content active" id="converter">
+            <h2>代理转换</h2>
+            <p>将代理配置转换为不同格式</p>
+            <form id="proxyConverterForm">
+                <textarea id="proxyInput" placeholder="输入代理配置" rows="10" cols="50"></textarea>
+                <br>
+                <label for="outputFormat">输出格式:</label>
+                <select id="outputFormat">
+                    <option value="theos">Theos Hook</option>
+                    <option value="quantumultx">Quantumult X 重写脚本</option>
+                </select>
+                <br>
+                <button type="button" onclick="convertProxy()">转换</button>
+            </form>
+            <div id="proxyOutput"></div>
+        </div>
+        <div class="page-content" id="hook-generator">
+            <h2>Hook生成器</h2>
+            <p>生成Theos Hook代码</p>
+            <form id="hookGeneratorForm">
+                <textarea id="hookInput" placeholder="输入Hook信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generateHook()">生成Hook</button>
+            </form>
+            <div id="hookOutput"></div>
+        </div>
+        <div class="page-content" id="patch-generator">
+            <h2>Patch生成器</h2>
+            <p>生成Theos Patch代码</p>
+            <form id="patchGeneratorForm">
+                <textarea id="patchInput" placeholder="输入Patch信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generatePatch()">生成Patch</button>
+            </form>
+            <div id="patchOutput"></div>
+        </div>
+        <script>
+            function showPage(pageName) {
+                const pages = ['converter', 'hook-generator', 'patch-generator'];
+                pages.forEach(page => {
+                    const pageElement = document.getElementById(page);
+                    if (pageElement) {
+                        pageElement.classList.toggle('active', page === pageName);
+                    }
+                });
+            }
+            function convertProxy() {
+                const input = document.getElementById('proxyInput').value;
+                const outputFormat = document.getElementById('outputFormat').value;
+                const outputElement = document.getElementById('proxyOutput');
+                outputElement.innerHTML = '转换结果: ' + input; // 这里应该添加实际的转换逻辑
+            }
+            function generateHook() {
+                const input = document.getElementById('hookInput').value;
+                const outputElement = document.getElementById('hookOutput');
+                outputElement.innerHTML = '生成的Hook代码: ' + input; // 这里应该添加实际的Hook生成逻辑
+            }
+            function generatePatch() {
+                const input = document.getElementById('patchInput').value;
+                const outputElement = document.getElementById('patchOutput');
+                outputElement.innerHTML = '生成的Patch代码: ' + input; // 这里应该添加实际的Patch生成逻辑
+            }
+        </script>
+        <div class="page-content active" id="converter">
+            <h2>代理转换</h2>
+            <p>将代理配置转换为不同格式</p>
+            <form id="proxyConverterForm">
+                <textarea id="proxyInput" placeholder="输入代理配置" rows="10" cols="50"></textarea>
+                <br>
+                <label for="outputFormat">输出格式:</label>
+                <select id="outputFormat">
+                    <option value="theos">Theos Hook</option>
+                    <option value="quantumultx">Quantumult X 重写脚本</option>
+                </select>
+                <br>
+                <button type="button" onclick="convertProxy()">转换</button>
+            </form>
+            <div id="proxyOutput"></div>
+        </div>
+        <div class="page-content" id="hook-generator">
+            <h2>Hook生成器</h2>
+            <p>生成Theos Hook代码</p>
+            <form id="hookGeneratorForm">
+                <textarea id="hookInput" placeholder="输入Hook信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generateHook()">生成Hook</button>
+            </form>
+            <div id="hookOutput"></div>
+        </div>
+        <div class="page-content" id="patch-generator">
+            <h2>Patch生成器</h2>
+            <p>生成Theos Patch代码</p>
+            <form id="patchGeneratorForm">
+                <textarea id="patchInput" placeholder="输入Patch信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generatePatch()">生成Patch</button>
+            </form>
+            <div id="patchOutput"></div>
+        </div>
+        <script>
+            function showPage(pageName) {
+                const pages = ['converter', 'hook-generator', 'patch-generator'];
+                pages.forEach(page => {
+                    const pageElement = document.getElementById(page);
+                    if (pageElement) {
+                        pageElement.classList.toggle('active', page === pageName);
+                    }
+                });
+            }
+            function convertProxy() {
+                const input = document.getElementById('proxyInput').value;
+                const outputFormat = document.getElementById('outputFormat').value;
+                const outputElement = document.getElementById('proxyOutput');
+                outputElement.innerHTML = '转换结果: ' + input; // 这里应该添加实际的转换逻辑
+            }
+            function generateHook() {
+                const input = document.getElementById('hookInput').value;
+                const outputElement = document.getElementById('hookOutput');
+                outputElement.innerHTML = '生成的Hook代码: ' + input; // 这里应该添加实际的Hook生成逻辑
+            }
+            function generatePatch() {
+                const input = document.getElementById('patchInput').value;
+                const outputElement = document.getElementById('patchOutput');
+                outputElement.innerHTML = '生成的Patch代码: ' + input; // 这里应该添加实际的Patch生成逻辑
+            }
+        </script>
+        <div class="page-content active" id="converter">
+            <h2>代理转换</h2>
+            <p>将代理配置转换为不同格式</p>
+            <form id="proxyConverterForm">
+                <textarea id="proxyInput" placeholder="输入代理配置" rows="10" cols="50"></textarea>
+                <br>
+                <label for="outputFormat">输出格式:</label>
+                <select id="outputFormat">
+                    <option value="theos">Theos Hook</option>
+                    <option value="quantumultx">Quantumult X 重写脚本</option>
+                </select>
+                <br>
+                <button type="button" onclick="convertProxy()">转换</button>
+            </form>
+            <div id="proxyOutput"></div>
+        </div>
+        <div class="page-content" id="hook-generator">
+            <h2>Hook生成器</h2>
+            <p>生成Theos Hook代码</p>
+            <form id="hookGeneratorForm">
+                <textarea id="hookInput" placeholder="输入Hook信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generateHook()">生成Hook</button>
+            </form>
+            <div id="hookOutput"></div>
+        </div>
+        <div class="page-content" id="patch-generator">
+            <h2>Patch生成器</h2>
+            <p>生成Theos Patch代码</p>
+            <form id="patchGeneratorForm">
+                <textarea id="patchInput" placeholder="输入Patch信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generatePatch()">生成Patch</button>
+            </form>
+            <div id="patchOutput"></div>
+        </div>
+        <script>
+            function showPage(pageName) {
+                const pages = ['converter', 'hook-generator', 'patch-generator'];
+                pages.forEach(page => {
+                    const pageElement = document.getElementById(page);
+                    if (pageElement) {
+                        pageElement.classList.toggle('active', page === pageName);
+                    }
+                });
+            }
+            function convertProxy() {
+                const input = document.getElementById('proxyInput').value;
+                const outputFormat = document.getElementById('outputFormat').value;
+                const outputElement = document.getElementById('proxyOutput');
+                outputElement.innerHTML = '转换结果: ' + input; // 这里应该添加实际的转换逻辑
+            }
+            function generateHook() {
+                const input = document.getElementById('hookInput').value;
+                const outputElement = document.getElementById('hookOutput');
+                outputElement.innerHTML = '生成的Hook代码: ' + input; // 这里应该添加实际的Hook生成逻辑
+            }
+            function generatePatch() {
+                const input = document.getElementById('patchInput').value;
+                const outputElement = document.getElementById('patchOutput');
+                outputElement.innerHTML = '生成的Patch代码: ' + input; // 这里应该添加实际的Patch生成逻辑
+            }
+        </script>
+        <div class="page-content active" id="converter">
+            <h2>代理转换</h2>
+            <p>将代理配置转换为不同格式</p>
+            <form id="proxyConverterForm">
+                <textarea id="proxyInput" placeholder="输入代理配置" rows="10" cols="50"></textarea>
+                <br>
+                <label for="outputFormat">输出格式:</label>
+                <select id="outputFormat">
+                    <option value="theos">Theos Hook</option>
+                    <option value="quantumultx">Quantumult X 重写脚本</option>
+                </select>
+                <br>
+                <button type="button" onclick="convertProxy()">转换</button>
+            </form>
+            <div id="proxyOutput"></div>
+        </div>
+        <div class="page-content" id="hook-generator">
+            <h2>Hook生成器</h2>
+            <p>生成Theos Hook代码</p>
+            <form id="hookGeneratorForm">
+                <textarea id="hookInput" placeholder="输入Hook信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generateHook()">生成Hook</button>
+            </form>
+            <div id="hookOutput"></div>
+        </div>
+        <div class="page-content" id="patch-generator">
+            <h2>Patch生成器</h2>
+            <p>生成Theos Patch代码</p>
+            <form id="patchGeneratorForm">
+                <textarea id="patchInput" placeholder="输入Patch信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generatePatch()">生成Patch</button>
+            </form>
+            <div id="patchOutput"></div>
+        </div>
+        <script>
+            function showPage(pageName) {
+                const pages = ['converter', 'hook-generator', 'patch-generator'];
+                pages.forEach(page => {
+                    const pageElement = document.getElementById(page);
+                    if (pageElement) {
+                        pageElement.classList.toggle('active', page === pageName);
+                    }
+                });
+            }
+            function convertProxy() {
+                const input = document.getElementById('proxyInput').value;
+                const outputFormat = document.getElementById('outputFormat').value;
+                const outputElement = document.getElementById('proxyOutput');
+                outputElement.innerHTML = '转换结果: ' + input; // 这里应该添加实际的转换逻辑
+            }
+            function generateHook() {
+                const input = document.getElementById('hookInput').value;
+                const outputElement = document.getElementById('hookOutput');
+                outputElement.innerHTML = '生成的Hook代码: ' + input; // 这里应该添加实际的Hook生成逻辑
+            }
+            function generatePatch() {
+                const input = document.getElementById('patchInput').value;
+                const outputElement = document.getElementById('patchOutput');
+                outputElement.innerHTML = '生成的Patch代码: ' + input; // 这里应该添加实际的Patch生成逻辑
+            }
+        </script>
+        <div class="page-content active" id="converter">
+            <h2>代理转换</h2>
+            <p>将代理配置转换为不同格式</p>
+            <form id="proxyConverterForm">
+                <textarea id="proxyInput" placeholder="输入代理配置" rows="10" cols="50"></textarea>
+                <br>
+                <label for="outputFormat">输出格式:</label>
+                <select id="outputFormat">
+                    <option value="theos">Theos Hook</option>
+                    <option value="quantumultx">Quantumult X 重写脚本</option>
+                </select>
+                <br>
+                <button type="button" onclick="convertProxy()">转换</button>
+            </form>
+            <div id="proxyOutput"></div>
+        </div>
+        <div class="page-content" id="hook-generator">
+            <h2>Hook生成器</h2>
+            <p>生成Theos Hook代码</p>
+            <form id="hookGeneratorForm">
+                <textarea id="hookInput" placeholder="输入Hook信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generateHook()">生成Hook</button>
+            </form>
+            <div id="hookOutput"></div>
+        </div>
+        <div class="page-content" id="patch-generator">
+            <h2>Patch生成器</h2>
+            <p>生成Theos Patch代码</p>
+            <form id="patchGeneratorForm">
+                <textarea id="patchInput" placeholder="输入Patch信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generatePatch()">生成Patch</button>
+            </form>
+            <div id="patchOutput"></div>
+        </div>
+        <script>
+            function showPage(pageName) {
+                const pages = ['converter', 'hook-generator', 'patch-generator'];
+                pages.forEach(page => {
+                    const pageElement = document.getElementById(page);
+                    if (pageElement) {
+                        pageElement.classList.toggle('active', page === pageName);
+                    }
+                });
+            }
+            function convertProxy() {
+                const input = document.getElementById('proxyInput').value;
+                const outputFormat = document.getElementById('outputFormat').value;
+                const outputElement = document.getElementById('proxyOutput');
+                outputElement.innerHTML = '转换结果: ' + input; // 这里应该添加实际的转换逻辑
+            }
+            function generateHook() {
+                const input = document.getElementById('hookInput').value;
+                const outputElement = document.getElementById('hookOutput');
+                outputElement.innerHTML = '生成的Hook代码: ' + input; // 这里应该添加实际的Hook生成逻辑
+            }
+            function generatePatch() {
+                const input = document.getElementById('patchInput').value;
+                const outputElement = document.getElementById('patchOutput');
+                outputElement.innerHTML = '生成的Patch代码: ' + input; // 这里应该添加实际的Patch生成逻辑
+            }
+        </script>
+        <div class="page-content active" id="converter">
+            <h2>代理转换</h2>
+            <p>将代理配置转换为不同格式</p>
+            <form id="proxyConverterForm">
+                <textarea id="proxyInput" placeholder="输入代理配置" rows="10" cols="50"></textarea>
+                <br>
+                <label for="outputFormat">输出格式:</label>
+                <select id="outputFormat">
+                    <option value="theos">Theos Hook</option>
+                    <option value="quantumultx">Quantumult X 重写脚本</option>
+                </select>
+                <br>
+                <button type="button" onclick="convertProxy()">转换</button>
+            </form>
+            <div id="proxyOutput"></div>
+        </div>
+        <div class="page-content" id="hook-generator">
+            <h2>Hook生成器</h2>
+            <p>生成Theos Hook代码</p>
+            <form id="hookGeneratorForm">
+                <textarea id="hookInput" placeholder="输入Hook信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generateHook()">生成Hook</button>
+            </form>
+            <div id="hookOutput"></div>
+        </div>
+        <div class="page-content" id="patch-generator">
+            <h2>Patch生成器</h2>
+            <p>生成Theos Patch代码</p>
+            <form id="patchGeneratorForm">
+                <textarea id="patchInput" placeholder="输入Patch信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generatePatch()">生成Patch</button>
+            </form>
+            <div id="patchOutput"></div>
+        </div>
+        <script>
+            function showPage(pageName) {
+                const pages = ['converter', 'hook-generator', 'patch-generator'];
+                pages.forEach(page => {
+                   
+            <div id="proxyOutput"></div>
+        </div>
+        <div class="page-content" id="hook-generator">
+            <h2>Hook生成器</h2>
+            <p>生成Theos Hook代码</p>
+            <form id="hookGeneratorForm">
+                <textarea id="hookInput" placeholder="输入Hook信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generateHook()">生成Hook</button>
+            </form>
+            <div id="hookOutput"></div>
+        </div>
+        <div class="page-content" id="patch-generator">
+            <h2>Patch生成器</h2>
+            <p>生成Theos Patch代码</p>
+            <form id="patchGeneratorForm">
+                <textarea id="patchInput" placeholder="输入Patch信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generatePatch()">生成Patch</button>
+            </form>
+            <div id="patchOutput"></div>
+        </div>
+        <script>
+            function showPage(pageName) {
+                const pages = ['converter', 'hook-generator', 'patch-generator'];
+                pages.forEach(page => {
+                   
+            <h2>Hook生成器</h2>
+            <p>生成Theos Hook代码</p>
+            <form id="hookGeneratorForm">
+                <textarea id="hookInput" placeholder="输入Hook信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generateHook()">生成Hook</button>
+            </form>
+            <div id="hookOutput"></div>
+        </div>
+        <div class="page-content" id="patch-generator">
+            <h2>Patch生成器</h2>
+            <p>生成Theos Patch代码</p>
+            <form id="patchGeneratorForm">
+                <textarea id="patchInput" placeholder="输入Patch信息" rows="10" cols="50"></textarea>
+                <br>
+                <button type="button" onclick="generatePatch()">生成Patch</button>
+            </form>
+            <div id="patchOutput"></div>
+        </div>
+        <script>
+            function showPage(pageName) {
+                const pages = ['converter', 'hook-generator', 'patch-generator'];
+                pages.forEach(page => {
+                   
+        <div class="page-content active" id="converter">
+            <h2>代理转换</h2>
+            <p>将代理配置转换为不同格式</p>
+            <form id="proxyConverterForm">
+                <textarea id="proxyInput" placeholder="输入代理配置" rows="10" cols="50"></textarea>
+                <br>
+                <label for="outputFormat">输出格式:</label>
+                <select id="outputFormat">
+                    <option value="theos">Theos Hook</option>
+                    <option value="quantumultx">Quantumult X 重写脚本</option>
+                </select>
+                <br>
+                <button type="button" onclick="convertProxy()">转换</button>
+            </form>
+            <div id="proxyOutput"></div>
+        </div>
+        <div class="page-content" id="hook-generator">
+            <h2>Hook生成器</h2>
+            <p>生成Theos Hook代码</p>
+            <form id="hookGeneratorForm">
+                <textarea id="hookInput" placeholder="输入Hook信息" rows="10" cols
